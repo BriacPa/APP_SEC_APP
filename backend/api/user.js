@@ -1,13 +1,11 @@
 const express = require('express');
-const verifyJWT = require('../middleware/verifyJWT');
-const express = require('express');
 const User = require('../models/User');
-require('dotenv').config();
+const verifyJWT = require('../middleware/verifyJWT');
 
 const router = express.Router();
 
 //fetch user
-router.get('/user', verifyJWT, async (req, res) => {
+router.get('/', verifyJWT, async (req, res) => {
     console.log("/user");
     try {
         const user = await User.findById(req.user.id).select('-password');

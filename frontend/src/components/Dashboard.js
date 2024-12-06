@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axiosInstance';
 
@@ -16,7 +15,6 @@ const Dashboard = () => {
                 const response = await axiosInstance.get('/auth/isAuthenticated', {
                     withCredentials: true, // Include cookies (JWT) with the request
                 });
-
                 if (response.status === 200) {
                     setUser(response.data.user); // Set user data from the server
                 } else {
@@ -33,7 +31,7 @@ const Dashboard = () => {
         // Fetch user data
         const fetchUserData = async () => {
             try {
-                const response = await axiosInstance.get('/auth/user', {
+                const response = await axiosInstance.get('/user', {
                     withCredentials: true,
                 });
 
