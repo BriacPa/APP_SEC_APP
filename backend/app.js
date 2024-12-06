@@ -25,7 +25,7 @@ app.use(bodyParser.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/app/user', userRoutes);
+app.use('/api/user', userRoutes);
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
