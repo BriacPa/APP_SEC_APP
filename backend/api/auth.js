@@ -1,6 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const User = require('../models/user');
 const nodemailer = require('nodemailer');
 const router = express.Router();
 const verifyJWT = require('../middleware/verifyJWT');
@@ -22,6 +22,7 @@ const sendVerificationEmail = async (user) => {
     const token = jwt.sign({ userId: user._id }, 'secret-key', { expiresIn: '1h' });
 
     const verificationUrl = `http://localhost:5000/api/auth/verify-email/${token}`;
+    console.log(verificationUrl);
 
     const mailOptions = {
         from: process.env.MAIL_USER,  // Zoho email address
@@ -42,17 +43,16 @@ const sendVerificationEmail = async (user) => {
 router.post('/register', async (req, res) => {
     console.log("/register");
     try {
-        const { username, email, password } = req.body;
+        let { username, email, password, confirmPassword } = req.body;
+        email = email.toLowerCase();
         const user = new User({ username, email, password });
+        if (password !== confirmPassword) return res.status(400).send('Passwords do not match');
         await user.save();
         await sendVerificationEmail(user); // Send email after user is saved
         res.status(201).send('User registered successfully!');
     } catch (error) {
-        if (error.code === 11000) {
-            const field = Object.keys(error.keyValue)[0]; // e.g., "username" or "email"
-            return res.status(400).json({ error: `${field} already exists!` });
-        }
-        res.status(400).json({ error: 'Error registering user. Please try again.' });
+        res.status(400).json({ error: error.message });
+        
     }
 });
 
@@ -83,8 +83,8 @@ router.get('/verify-email/:token', async (req, res) => {
 router.post('/login', async (req, res) => {
     console.log("/login");
     try {
-        const { email, password } = req.body;
-
+        let { email, password } = req.body;
+        email = email.toLowerCase();
         const user = await User.findOne({ email });
         if (!user || !(await user.comparePassword(password))) return res.status(401).send('Invalid email or password');
         if (!user.isEmailVerified) return res.status(401).send('Email not verified');
@@ -130,13 +130,14 @@ router.get('/user', verifyJWT, async (req, res) => {
 });
 
 // Route to check if the user is authenticated
-router.get('/isAuthenticated', verifyJWT, async (req, res) => {
+router.get('/isAuthenticated', verifyJWT, (req, res) => {
     console.log("/isAuthenticated");
     try {
-        // If the token is valid, the request will pass the verifyJWT middleware
-        res.json({ isAuthenticated: true, user: req.user });
+        res.json({
+            isAuthenticated: true,
+        });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to authenticate user' });
+        res.status(403).json({ isAuthenticated: false });
     }
 });
 

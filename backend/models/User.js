@@ -39,12 +39,17 @@ const userSchema = new mongoose.Schema(
             enum: [
                 'user',
                 'author', 
+                'moderator',
                 'admin', 
         ] },
         
         isEmailVerified: { 
             type: Boolean, 
             default: false 
+        },
+        resetCode: { 
+            type: String, 
+            default: null
         }
     },
     { timestamps: true }

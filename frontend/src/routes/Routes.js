@@ -2,25 +2,36 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../utils/axiosInstance'; // Ensure this is correctly set up for your axios instance
 import ProtectedRoute from '../components/ProtectedRoute';
-import Dashboard from '../components/Dashboard';
-import Login from '../components/Login';
-import Register from '../components/Register';
+import Dashboard from '../pages/Dashboard';
+import Login from '../pages/Login';
+import Register from '../pages/Register';
+import ResetPasswordRes from '../pages/ResetPasswordRes';
+import ResetPasswordReq from '../pages/ResetPasswordReq';
+import AddArticle from '../pages/AddArticle';
+import Articles from '../pages/Articles';
+import Article from '../pages/Article';
 
 const App = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [role, setRole] = useState(null); // Add role state
     const [loading, setLoading] = useState(true); // Loading state to manage initial auth check
 
     useEffect(() => {
         const checkAuthentication = async () => {
             try {
                 const response = await axiosInstance.get('/auth/isAuthenticated', { withCredentials: true });
-                if (response.data.isAuthenticated) {
-                    setIsAuthenticated(true);
-                } else {
-                    setIsAuthenticated(false);
-                }
+                const user = await axiosInstance.get('/auth/user', { withCredentials: true });
+
+                setIsAuthenticated(response.data.isAuthenticated || false);
+                setRole(user.data.role || null); // Set role from response
             } catch (error) {
-                setIsAuthenticated(false); // In case of error, assume the user is not authenticated
+                // Suppress 403 errors without logging them to the console
+                if (error.response?.status === 403) {
+                    setIsAuthenticated(false);
+                    setRole(null);
+                } else {
+                    console.error('Error during authentication check:', error);
+                }
             } finally {
                 setLoading(false); // Set loading to false after authentication check
             }
@@ -40,13 +51,27 @@ const App = () => {
                 {/* Public Routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/reset-password" element={<ResetPasswordReq />} />
+                <Route path="/reset-password-active" element={<ResetPasswordRes />} />
+                <Route path="/articles" element={<Articles />} />
+                <Route path="/article" element={<Article />} />
 
-                {/* Protected Route */}
+                {/* Protected Routes */}
                 <Route 
                     path="/dashboard" 
                     element={
-                        <ProtectedRoute isAuthenticated={isAuthenticated}>
+                        <ProtectedRoute isAuthenticated={isAuthenticated} requiredRole={['user','author','moderator','admin']} userRole={role}>
                             <Dashboard />
+                        </ProtectedRoute>
+                    } 
+                />
+                <Route
+                    path="/add-article"
+                    element={
+                        <ProtectedRoute isAuthenticated={isAuthenticated} 
+                        requiredRole={['author','moderator','admin']} 
+                        userRole={role}>
+                            <AddArticle />
                         </ProtectedRoute>
                     } 
                 />

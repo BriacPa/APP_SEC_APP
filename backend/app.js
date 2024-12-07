@@ -5,6 +5,8 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const authRoutes = require('./api/auth');
 const userRoutes = require('./api/user');
+const articleRoutes = require('./api/article');
+const resetPassRoutes = require('./api/resetPass');
 const cookieParser = require('cookie-parser');
 
 dotenv.config();
@@ -26,6 +28,8 @@ app.use(bodyParser.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/resetPass', resetPassRoutes);
+app.use('/api/article', articleRoutes);
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
