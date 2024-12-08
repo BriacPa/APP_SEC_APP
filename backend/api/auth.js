@@ -137,7 +137,9 @@ router.get('/isAuthenticated', verifyJWT, (req, res) => {
             isAuthenticated: true,
         });
     } catch (error) {
-        res.status(403).json({ isAuthenticated: false });
+        res.json({
+            isAuthenticated: false,
+        });
     }
 });
 

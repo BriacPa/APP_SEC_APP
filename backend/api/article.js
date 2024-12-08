@@ -2,6 +2,7 @@ const express = require('express');
 const User = require('../models/user');
 const Article = require('../models/article');
 const Comment = require('../models/comment');
+const Rates = require('../models/rates');
 const verifyJWT = require('../middleware/verifyJWT');
 const mongoose = require('mongoose');
 
@@ -27,10 +28,12 @@ router.post('/addArticle', verifyJWT, async (req, res) => {
         }
 
         if (!categories) categories = [];   
+        console.log(title, body, categories);
         
         // Create a new article using the user ID from req.user
-        const article = new Article({ title, body, author: req.user.id, categories });
+        const article = new Article({ title, categories, body, author: req.user.id });
         await article.save();
+        console.log('Article added successfully:', article);
         
         res.status(201).send('Article added successfully!');
     } catch (error) {
@@ -72,12 +75,22 @@ router.post('/comment', verifyJWT, async (req, res) => {
         console.log(articleId, comment, authorId);
         if (!articleId) return res.status(400).send('Article ID is required');
         if (!comment) return res.status(400).send('Comment is required');
-        let newComment;
-        if (!authorId) {
-            newComment = new Comment({ article: articleId, body: comment });
-        } else {
-            newComment = new Comment({ article: articleId, body: comment, author: authorId });
-        }
+        let newComment = new Comment({ article: articleId, body: comment, author: authorId });
+        await newComment.save();
+        res.status(201).send('Comment added successfully!');
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+router.post('/commentNO', async (req, res) => {
+    console.log("/commentNO");
+    try {
+        let { articleId, comment} = req.body;
+        console.log(articleId, comment);
+        if (!articleId) return res.status(400).send('Article ID is required');
+        if (!comment) return res.status(400).send('Comment is required');
+        let newComment = new Comment({ article: articleId, body: comment });
         await newComment.save();
         res.status(201).send('Comment added successfully!');
     } catch (error) {
@@ -99,11 +112,53 @@ router.get('/comments', async (req, res) => {
     }
     try {
         const comments = await Comment.find({ article : articleId }).populate('author', 'username');
-        if (comments.length === 0) return res.status(404).send('No comments found for this article');
         res.json(comments);
     } catch (error) {
-        console.log(error);
         res.status(500).json({ error: error.message });
+    }
+});
+
+
+router.post('/Rate', verifyJWT, async (req, res) => {
+    console.log("/Rate");
+
+    try {
+        const { articleId, rate } = req.body; // Ensure the field is `rate`, not `rating`
+        const authorId = req.user.id;
+
+        if (!articleId) return res.status(400).send('Article ID is required');
+        if (rate === undefined) return res.status(400).send('Rate is required'); // Check if rate exists
+        if (rate < 1 || rate > 5) return res.status(400).send('Rate must be between 1 and 5'); // Validate range
+
+        // Find the article to ensure it exists
+        const currentArticle = await Article.findById(articleId);
+        if (!currentArticle) return res.status(404).send('Article not found');
+
+        // Create a new rate document
+        if(await Rates.findOne({ article: articleId, author: authorId })) {
+            const newRate = await Rates.findOne({ article: articleId, author: authorId });
+            newRate.rate = rate;
+            await newRate.save();
+        }else{
+            const newRate = new Rates({ article: articleId, rate, author: authorId });
+            await newRate.save();
+        }
+        
+        
+        // Fetch all ratings for this article
+        const currentRates = await Rates.find({ article: articleId });
+
+        // Calculate the new average rating
+        const totalRates = currentRates.reduce((acc, r) => acc + r.rate, 0);
+        const averageRate = totalRates / currentRates.length;
+
+        // Update the article's rating
+        currentArticle.rating = averageRate;
+        await currentArticle.save();    
+
+        res.status(201).send('Rate added successfully!');
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
 });
 

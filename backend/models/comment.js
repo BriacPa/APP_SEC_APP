@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const articleSchema = new mongoose.Schema(
+const commentSchema = new mongoose.Schema(
     {
         body: {
             type: String,
@@ -19,4 +19,4 @@ const articleSchema = new mongoose.Schema(
      }, { timestamps: true } // Automatically create `createdAt` and `updatedAt`
 );
 
-module.exports = mongoose.model('Comment', articleSchema);
+module.exports = mongoose.model('Comment', commentSchema);

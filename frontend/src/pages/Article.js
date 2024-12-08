@@ -7,6 +7,8 @@ const Articles = () => {
     const [title, setTitle] = useState('');
     const [comment, setComment] = useState('');
     const [comments, setComments] = useState([]);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [rate, setRate] = useState('');
 
     // Set the title from the URL query parameter only on initial render
     useEffect(() => {
@@ -17,9 +19,26 @@ const Articles = () => {
         }
     }, []); // Empty dependency array ensures this effect runs only once on mount
 
+    // Check user authentication
+    useEffect(() => {
+        const checkAuthentication = async () => {
+            try {
+                await axiosInstance.get('/auth/isAuthenticated', {
+                    withCredentials: true,
+                });
+                setIsAuthenticated(true);
+                console.log('Authenticated');
+            } catch (err) {
+                setIsAuthenticated(false);
+                console.log('Not Authenticated');
+            }
+        };
+        checkAuthentication();
+    }, []);
+
     // Fetch article data based on title
     useEffect(() => {
-        if (!title) return;  // Don't fetch article if title is empty
+        if (!title) return; // Don't fetch article if title is empty
         const fetchArticle = async () => {
             try {
                 const response = await axiosInstance.get(`/article/article?title=${title}`);
@@ -34,7 +53,7 @@ const Articles = () => {
 
     // Function to fetch comments
     const fetchComments = async () => {
-        if (!article._id) return;  // Don't fetch comments if article ID is not available
+        if (!article._id) return; // Don't fetch comments if article ID is not available
         try {
             const response = await axiosInstance.get(`/article/comments?articleId=${article._id}`);
             setComments(response.data);
@@ -50,14 +69,26 @@ const Articles = () => {
             setError('Article not found');
             return;
         }
+        console.log(isAuthenticated);
 
         try {
-            await axiosInstance.post('/article/comment', {
-                articleId: article._id,
-                comment,
-            }, {
-                withCredentials: true
-            });
+            if (!isAuthenticated) {
+                await axiosInstance.post('/article/commentNO', {
+                    articleId: article._id,
+                    comment,
+                });
+            } else {
+                await axiosInstance.post(
+                    '/article/comment',
+                    {
+                        articleId: article._id,
+                        comment,
+                    },
+                    {
+                        withCredentials: true,
+                    }
+                );
+            }
             setComment(''); // Clear the comment input after successful submission
             // Fetch comments after submitting
             fetchComments();
@@ -70,6 +101,33 @@ const Articles = () => {
         fetchComments();
     }, [article._id]); // Fetch comments whenever the article ID changes
 
+    const handleRatingSubmit = async (e) => {
+        e.preventDefault();
+        if (!article._id) {
+            setError('Article not found');
+            return;
+        }
+
+        try {
+            await axiosInstance.post(
+                '/article/rate',
+                {
+                    articleId: article._id,
+                    rate,
+                },
+                {
+                    withCredentials: true,
+                }
+            );
+            setRate(''); // Clear the rating input after successful submission
+            // Fetch article after submitting rating
+            const response = await axiosInstance.get(`/article/article?title=${title}`);
+            setArticle(response.data);
+        } catch (err) {
+            setError('Failed to submit rating : '+ err.message);
+        }
+    }
+
     return (
         <div>
             {error ? (
@@ -77,24 +135,44 @@ const Articles = () => {
             ) : (
                 <>
                     <h1>{article.title}</h1>
+                    <p>Created at: {new Date(article.createdAt).toLocaleString()}</p>
+                    <p>Categories: {article.categories?.join(', ')}</p>
+                    <p>Rating: {article.rating || 'No ratings yet'}</p>    
                     <p>{article.body}</p>
                     <p>Author: {article.author?.username}</p>
 
-                    {/* Display comments */}
+                    {isAuthenticated && (
+                        <>
+                            <div>
+                                <h4>Rate this Article</h4>
+                                <form onSubmit={handleRatingSubmit}>
+                                    <select value={rate} onChange={(e) => setRate(e.target.value)} required>
+                                        <option value="">Select a rating</option>
+                                        {[1, 2, 3, 4, 5].map((value) => (
+                                            <option key={value} value={value}>
+                                                {value}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <button type="submit">Submit Rating</button>
+                                </form>
+                            </div>
+                        </>
+                    )}
                     <div>
-                        <h4>Comments</h4>
-                        {comments.length > 0 ? (
-                            comments.map((comment) => (
-                                <div key={comment._id}>
-                                    <p>{comment.author?.username}: {comment.body}</p>
-                                </div>
-                            ))
-                        ) : (
-                            <p>No comments yet.</p>
-                        )}
-                    </div>
-
-                    {/* Comment Section */}
+                                <h4>Comments</h4>
+                                {comments.length > 0 ? (
+                                    comments.map((comment) => (
+                                        <div key={comment._id}>
+                                            <p>
+                                                {comment.author?.username || 'Anonymous'}: {comment.body}
+                                            </p>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p>No comments yet.</p>
+                                )}
+                            </div>
                     <div>
                         <h4>Leave a Comment</h4>
                         <form onSubmit={handleCommentSubmit}>
@@ -107,7 +185,6 @@ const Articles = () => {
                             <button type="submit">Submit</button>
                         </form>
                     </div>
-
                 </>
             )}
         </div>

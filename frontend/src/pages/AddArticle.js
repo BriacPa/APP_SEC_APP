@@ -10,6 +10,7 @@ function Reset() {
     const { user, error, loading, setUser } = useFetchUserData(); // Use the custom hook
     const [title, setTitle] = React.useState('');
     const [body, setBody] = React.useState('');
+    const [keywordsArray, setKeywordsArray] = React.useState([]);
 
     if (error || loading || !user) {
         return <UserStatus error={error} loading={loading} user={user} />;
@@ -28,7 +29,7 @@ function Reset() {
             try {
                 const response = await axiosInstance.post(
                     '/article/addArticle',
-                    { title, body },
+                    { title, body, categories: keywordsArray },
                     { withCredentials: true }
                 );
                 console.log('Article added successfully:', response.data);
@@ -63,7 +64,7 @@ function Reset() {
                 type="text"
                 placeholder="Keywords (comma separated)"
                 onChange={(e) => {
-                    const keywordsArray = e.target.value.split(',').map(word => word.trim());
+                    setKeywordsArray(e.target.value.split(',').map(word => word.trim()));
                     console.log(keywordsArray);
                 }}
             />
