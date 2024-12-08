@@ -12,6 +12,7 @@ import AddArticle from '../pages/AddArticle';
 import Articles from '../pages/Articles';
 import Article from '../pages/Article';
 import ChangeMail from '../pages/ChangeMail';
+import UserManagment from '../pages/UserManagment';
 
 
 const App = () => {
@@ -95,6 +96,16 @@ const App = () => {
                         requiredRole={['user','author','moderator','admin']} 
                         userRole={role}>
                             <ResetPasswordLog />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/user-managment"
+                    element={
+                        <ProtectedRoute isAuthenticated={isAuthenticated} 
+                        requiredRole={['admin','moderator']} 
+                        userRole={role}>
+                            <UserManagment />
                         </ProtectedRoute>
                     }
                 />

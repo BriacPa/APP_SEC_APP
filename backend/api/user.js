@@ -244,4 +244,17 @@ router.get('/comments', verifyJWT, async (req, res) => {
     }
 });
 
+router.get('/all-users', verifyJWT, async (req, res) => {
+    console.log("/all-users");
+    const user = await User.findById(req.user.id);
+    const role = user.role; 
+    if (role !== 'admin' && role !== 'moderator') return res.status(403).json({ error: 'Unauthorized' });
+    try {
+        const users = await User.find().select('-password');
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch users' });
+    }
+});
+
 module.exports = router;
