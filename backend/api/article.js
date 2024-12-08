@@ -162,21 +162,52 @@ router.post('/Rate', verifyJWT, async (req, res) => {
     }
 });
 
-router.delete('/del/:id', async (req, res) => {
+router.delete('/del/:id', verifyJWT, async (req, res) => {
     console.log('/del/:id');
-    const { id } = req.params;
+
     try {
+        const { id } = req.params; // Extract the article ID from route parameters
+        const userID = req.user.id; // Get the user ID from the JWT token
+
+        // Fetch the user to check their role
+        const user = await User.findById(userID);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const role = user.role; // Extract the user's role
+        console.log(`Role: ${role}`);
+
+        // Fetch the article by ID
         const article = await Article.findById(id);
         if (!article) return res.status(404).json({ message: 'Article not found' });
 
+        // Check if the user is authorized to delete the article
+        if (article.author.toString() !== userID && role !== 'admin' && role !== 'moderator') {
+            return res.status(403).json({ message: 'You do not have permission to delete this article' });
+        }
+
+        // Call the function to delete related comments and ratings
+        await DeleteComsAndRates(id);
+
+        // Delete the article
         await article.deleteOne();
+
         res.status(200).json({ message: 'Article successfully deleted' });
     } catch (error) {
         console.error('Error deleting article:', error);
         res.status(500).json({ message: 'Failed to delete article' });
     }
+});
+
+
+const DeleteComsAndRates = async (articleId) => {
+    try {
+        await Comment.deleteMany({ article: articleId });
+        await Rates.deleteMany({ article: articleId });
+    }
+    catch (error) {
+        console.error('Error deleting comments and rates:', error);
+    }
 }
-);
 
 router.get('/ArticlesAuthor' , verifyJWT, async (req, res) => {
     console.log('/ArticlesAuthor');

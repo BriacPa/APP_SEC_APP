@@ -22,6 +22,7 @@ const Comments = (user,setUser) => {
     
 
     const deleteComment = (commentId) => async () => {
+        console.log('Deleting comment:', commentId);
         await axiosInstance.delete(`/comment/del/${commentId}`, { withCredentials: true });
         fetchComments();
     };
@@ -33,12 +34,16 @@ const Comments = (user,setUser) => {
         <div key={comment._id}>
             <p>
                 Article :{' '}
-                <a href={`/article/?title=${comment.article.title}`}>
-                    {`${comment.article.title}`}
-                </a> 
+                {comment.article ? (
+                    <a href={`/article/?title=${comment.article.title}`}>
+                        {`${comment.article.title}`}
+                    </a>
+                ) : (
+                    'Unknown Article'
+                )}
                 {' '}- "{comment.body}" at {new Date(comment.createdAt).toLocaleString()}
             </p>
-            <button onClick={() => deleteComment(comment._id)}>Delete</button>
+            <button onClick={deleteComment(comment._id)}>Delete</button>
         </div>
     ))}
 </div>

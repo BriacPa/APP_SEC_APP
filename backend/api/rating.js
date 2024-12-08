@@ -2,20 +2,26 @@ const Rates = require('../models/rates');
 const router = require('express').Router();
 const verifyJWT = require('../middleware/verifyJWT');
 const Article = require('../models/article');
+const User = require('../models/user');
 
-router.delete('/del/:id', async (req, res) => {
+router.delete('/del/:id', verifyJWT, async (req, res) => {
     console.log('/rating/:id-(delete)');
     const { id } = req.params;
+    const role = await User.findById(req.user.id).role;
+    const userID = req.user.id;
     try {
         const rating = await Rates.findById(id);
         if (!rating) return res.status(404).json({ message: 'rating not found' });
-        articleId = rating.article;
+        const articleId = rating.article;
+        if (role !== 'admin' && role !== 'moderator' && userID !== String(rating.author)) {
+            return res.status(403).json({ message: 'You do not have permission to delete this rating' });
+        }
         await rating.deleteOne();
         updateArticleRate(articleId);
-        res.status(200).json({ message: 'Comment successfully deleted' });
+        res.status(200).json({ message: 'rating successfully deleted' });
     } catch (error) {
-        console.error('Error deleting comment:', error);
-        res.status(500).json({ message: 'Failed to delete comment' });
+        console.error('Error deleting rating:', error);
+        res.status(500).json({ message: 'Failed to delete rating' });
     }
 });
 
