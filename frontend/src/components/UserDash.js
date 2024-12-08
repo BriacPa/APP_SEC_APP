@@ -3,9 +3,8 @@ import axiosInstance from '../utils/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
-const UserDash = ({ user, setUser }) => {
+const UserDash = ({ user, setUser, setError }) => {
     const navigate = useNavigate();
-    const [error, setError] = useState(null);
 
     const changeMail = () => {
         window.location.href = '/changeMail';

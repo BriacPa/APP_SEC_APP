@@ -162,4 +162,31 @@ router.post('/Rate', verifyJWT, async (req, res) => {
     }
 });
 
+router.delete('/del/:id', async (req, res) => {
+    console.log('/del/:id');
+    const { id } = req.params;
+    try {
+        const article = await Article.findById(id);
+        if (!article) return res.status(404).json({ message: 'Article not found' });
+
+        await article.deleteOne();
+        res.status(200).json({ message: 'Article successfully deleted' });
+    } catch (error) {
+        console.error('Error deleting article:', error);
+        res.status(500).json({ message: 'Failed to delete article' });
+    }
+}
+);
+
+router.get('/ArticlesAuthor' , verifyJWT, async (req, res) => {
+    console.log('/ArticlesAuthor');
+    try {
+        const articles = await Article.find({ author: req.user.id });
+        res.json(articles);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+);
+
 module.exports = router;

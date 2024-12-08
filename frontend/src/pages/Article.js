@@ -128,6 +128,12 @@ const Articles = () => {
         }
     }
 
+
+    let strRate = article.rating + "/5";
+    if(article.rating === 0){
+        strRate = "No rating yet";
+    }
+
     return (
         <div>
             {error ? (
@@ -137,7 +143,7 @@ const Articles = () => {
                     <h1>{article.title}</h1>
                     <p>Created at: {new Date(article.createdAt).toLocaleString()}</p>
                     <p>Categories: {article.categories?.join(', ')}</p>
-                    <p>Rating: {article.rating || 'No ratings yet'}</p>    
+                    <p>Rating: {strRate}</p>    
                     <p>{article.body}</p>
                     <p>Author: {article.author?.username}</p>
 
@@ -165,7 +171,7 @@ const Articles = () => {
                                     comments.map((comment) => (
                                         <div key={comment._id}>
                                             <p>
-                                                {comment.author?.username || 'Anonymous'}: {comment.body}
+                                                {comment.author?.username || 'Anonymous'}: {comment.body} at {new Date(comment.createdAt).toLocaleString()}
                                             </p>
                                         </div>
                                     ))

@@ -3,6 +3,7 @@ import axiosInstance from '../utils/axiosInstance';
 
 const Articles = () => {
     const [articles, setArticles] = useState([]);
+    const [rating, setRating] = useState(0);
     useEffect(() => {
         const fetchArticles = async () => {
             const response = await axiosInstance.get('/article/allArticles');
@@ -22,7 +23,7 @@ const Articles = () => {
                     </h3>
                     <p>Categories: {article.categories.join(', ')}</p>
                     <p>Created at: {new Date(article.createdAt).toLocaleString()}</p>
-                    <p>Rating: {article.rating}</p>
+                    {article.rating === 0 ? <p>Rating : No rating yet</p> : <p>Rating: {article.rating}/5</p>}
                     <p>{article.body}</p>
                     <p>Author: {article.author.username}</p>
                 </div>

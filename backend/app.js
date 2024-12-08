@@ -8,6 +8,8 @@ const userRoutes = require('./api/user');
 const articleRoutes = require('./api/article');
 const resetPassRoutes = require('./api/resetPass');
 const cookieParser = require('cookie-parser');
+const commentRoutes = require('./api/comment');
+const rateRoutes = require('./api/rating');
 
 dotenv.config();
 
@@ -30,6 +32,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/resetPass', resetPassRoutes);
 app.use('/api/article', articleRoutes);
+app.use('/api/comment', commentRoutes);
+app.use('/api/rating', rateRoutes);
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)

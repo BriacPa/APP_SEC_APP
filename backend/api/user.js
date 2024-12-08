@@ -234,4 +234,14 @@ const updateArticleRate = async (articleId) => {
 
 }
 
+router.get('/comments', verifyJWT, async (req, res) => {
+    console.log("/comments");
+    try {
+        const comments = await Comment.find({ author: req.user.id }).populate('article', 'title');
+        res.json(comments);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch comments' });
+    }
+});
+
 module.exports = router;
