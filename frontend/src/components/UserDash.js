@@ -1,8 +1,11 @@
 import LogoutButton from '../components/LogoutButton';
 import axiosInstance from '../utils/axiosInstance';
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 const UserDash = ({ user, setUser }) => {
-        
+    const navigate = useNavigate();
+    const [error, setError] = useState(null);
 
     const changeMail = () => {
         window.location.href = '/changeMail';
@@ -14,8 +17,18 @@ const UserDash = ({ user, setUser }) => {
     const deleteAccount = async () => {
         await axiosInstance.post('/user/delete-account-req', { withCredentials: true })
             .then((res) => {
+                alert('Delete account email sent');
                 console.log(res);
-                setUser(null);
+                try {
+                    axiosInstance.post('/auth/logout', {}, {
+                        withCredentials: true,
+                    });
+                    setUser(null); // Reset user data
+                    navigate('/login'); // Redirect to the login page
+                } catch (err) {
+                    console.error('Error during logout:', err);
+                    setError && setError('Error occurred during logout'); // Only call setError if passed as a prop
+                }
             })
             .catch((err) => {
                 console.error(err);
