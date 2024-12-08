@@ -7,9 +7,12 @@ import Login from '../pages/Login';
 import Register from '../pages/Register';
 import ResetPasswordRes from '../pages/ResetPasswordRes';
 import ResetPasswordReq from '../pages/ResetPasswordReq';
+import ResetPasswordLog from '../pages/ResetPasswordLog';
 import AddArticle from '../pages/AddArticle';
 import Articles from '../pages/Articles';
 import Article from '../pages/Article';
+import ChangeMail from '../pages/ChangeMail';
+
 
 const App = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -74,6 +77,26 @@ const App = () => {
                             <AddArticle />
                         </ProtectedRoute>
                     } 
+                />
+                <Route
+                    path="/changeMail"
+                    element={
+                        <ProtectedRoute isAuthenticated={isAuthenticated} 
+                        requiredRole={['user','author','moderator','admin']} 
+                        userRole={role}>
+                            <ChangeMail />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/reset-password-logged"
+                    element={
+                        <ProtectedRoute isAuthenticated={isAuthenticated} 
+                        requiredRole={['user','author','moderator','admin']} 
+                        userRole={role}>
+                            <ResetPasswordLog />
+                        </ProtectedRoute>
+                    }
                 />
 
                 {/* Redirect if route doesn't exist */}
