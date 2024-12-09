@@ -257,4 +257,41 @@ router.get('/all-users', verifyJWT, async (req, res) => {
     }
 });
 
+router.get('/specific-user', verifyJWT, async (req, res) => {
+    console.log("/specific-user");
+    const { userId } = req.query
+    try {
+    if (!userId) return res.status(400).json({ error: 'User ID is required' });
+    const manager = await User.findById(req.user.id);
+    if (!manager) return res.status(404).json({ error: 'Manager not found' });
+    const user = await User.findById(userId).select('-password');
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!(manager.role === 'admin' || (manager.role === 'moderator' && (user.role === 'user' || user.role === 'author')))) return res.status(403).json({ error: 'Unauthorized' });
+    res.json(user);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch user' });
+    }
+}
+);
+
+router.post('/change-role', verifyJWT, async (req, res) => {
+    console.log("/change-role");
+    const { userId, role } = req.body;
+    if (!userId || !role) return res.status(400).json({ error: 'User ID and role are required' });
+    try {
+        const manager = await User.findById(req.user.id);
+        if (!manager) return res.status(404).json({ error: 'Manager not found' });
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        if (!(manager.role === 'admin' || (manager.role === 'moderator' && (user.role === 'user' || user.role === 'author')))) return res.status(403).json({ error: 'Unauthorized' });
+        user.role = role;
+        await user.save();
+        res.json({ message: 'User role updated' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update user role' });
+    }
+}
+);
+    
+
 module.exports = router;

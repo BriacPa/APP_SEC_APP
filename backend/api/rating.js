@@ -7,7 +7,8 @@ const User = require('../models/user');
 router.delete('/del/:id', verifyJWT, async (req, res) => {
     console.log('/rating/:id-(delete)');
     const { id } = req.params;
-    const role = await User.findById(req.user.id).role;
+    const user = await User.findById(req.user.id);
+    const role = user.role;
     const userID = req.user.id;
     try {
         const rating = await Rates.findById(id);
@@ -56,7 +57,17 @@ const updateArticleRate = async (articleId) => {
         await article.save();
         console.log(`Article ${articleId} rate updated to ${avgRate}`);
     }
-
 }
+
+router.get('/RatingsAuthorQw', verifyJWT, async (req, res) => {
+    console.log('/RatingsAuthorQw');
+    try {
+        const userId = req.query.id;
+        const ratings = await Rates.find({ author: userId }).populate('article', 'title');
+        res.json(ratings);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 module.exports = router;

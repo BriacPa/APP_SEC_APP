@@ -174,7 +174,6 @@ router.delete('/del/:id', verifyJWT, async (req, res) => {
         if (!user) return res.status(404).json({ message: 'User not found' });
 
         const role = user.role; // Extract the user's role
-        console.log(`Role: ${role}`);
 
         // Fetch the article by ID
         const article = await Article.findById(id);
@@ -219,5 +218,17 @@ router.get('/ArticlesAuthor' , verifyJWT, async (req, res) => {
     }
 }
 );
+
+router.get('/ArticlesAuthorQw' , async (req, res) => {
+    console.log('/ArticlesAuthor(query)');
+    console.log(req.query.id);
+    if (!req.query.id) return res.status(400).send('ID is required');
+    try {
+        const articles = await Article.find({ author: req.query.id });
+        res.json(articles);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 module.exports = router;
