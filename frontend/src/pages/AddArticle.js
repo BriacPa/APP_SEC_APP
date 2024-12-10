@@ -10,12 +10,25 @@ function Reset() {
     const { user, error, loading, setUser } = useFetchUserData(); // Use the custom hook
     const [title, setTitle] = React.useState('');
     const [body, setBody] = React.useState('');
+    const [categories, setCategories] = React.useState([]);
     const [keywordsArray, setKeywordsArray] = React.useState([]);
+
+    const getCategorie = async () => {
+        try {
+            const response = await axiosInstance.get('/categorie/');
+            setCategories(response.data);
+        } catch (error) {
+            console.error('Failed to fetch categories:', error);
+        }
+    }
+
+    React.useEffect(() => {
+        getCategorie();
+    }, []);
 
     if (error || loading || !user) {
         return <UserStatus error={error} loading={loading} user={user} />;
     }
-
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -60,14 +73,26 @@ function Reset() {
                 rows="4"
                 cols="50"
             />
-            <input
-                type="text"
-                placeholder="Keywords (comma separated)"
-                onChange={(e) => {
-                    setKeywordsArray(e.target.value.split(',').map(word => word.trim()));
-                    console.log(keywordsArray);
-                }}
-            />
+            {categories.map((category) => (
+                <div key={category._id}>
+                    <label>
+                        <input
+                            type="checkbox"
+                            value={category.name}
+                            onChange={(e) => {
+                                if (e.target.checked) {
+                                    setKeywordsArray([...keywordsArray, category._id]);
+                                } else {
+                                    setKeywordsArray(keywordsArray.filter((keyword) => keyword !== category._id));
+                                }
+                            }}
+                        />
+                        {category.name}
+                    </label>
+                </div>
+            ))}
+
+            
             <button type="submit">Submit</button>
             <LogoutButton setUser={setUser}/>
         </form>

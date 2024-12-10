@@ -14,6 +14,7 @@ import Article from '../pages/Article';
 import ChangeMail from '../pages/ChangeMail';
 import UserManagment from '../pages/UserManagment';
 import ManageUser from '../pages/ManageUser';
+import Categories from '../pages/Categories';
 
 
 const App = () => {
@@ -117,6 +118,16 @@ const App = () => {
                         requiredRole={['admin','moderator']} 
                         userRole={role}>
                             <ManageUser />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/categories"
+                    element={
+                        <ProtectedRoute isAuthenticated={isAuthenticated} 
+                        requiredRole={['admin']} 
+                        userRole={role}>
+                            <Categories />
                         </ProtectedRoute>
                     }
                 />

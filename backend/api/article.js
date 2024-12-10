@@ -46,7 +46,7 @@ router.post('/addArticle', verifyJWT, async (req, res) => {
 router.get('/allArticles', async (req, res) => {
     console.log("/allArticles");
     try {
-        const articles = await Article.find().populate('author', 'username');
+        const articles = await Article.find().populate('author', 'username').populate('categories', 'name');
         res.json(articles);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -153,7 +153,7 @@ router.post('/Rate', verifyJWT, async (req, res) => {
         const averageRate = totalRates / currentRates.length;
 
         // Update the article's rating
-        currentArticle.rating = averageRate;
+        currentArticle.rating = Math.round(averageRate);
         await currentArticle.save();    
 
         res.status(201).send('Rate added successfully!');
@@ -202,6 +202,7 @@ const DeleteComsAndRates = async (articleId) => {
     try {
         await Comment.deleteMany({ article: articleId });
         await Rates.deleteMany({ article: articleId });
+
     }
     catch (error) {
         console.error('Error deleting comments and rates:', error);
@@ -226,6 +227,16 @@ router.get('/ArticlesAuthorQw' , async (req, res) => {
     try {
         const articles = await Article.find({ author: req.query.id });
         res.json(articles);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.get('/allCategories', async (req, res) => {
+    console.log('/allCategories');
+    try {
+        const categories = await Article.distinct('categories');
+        res.json(categories);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

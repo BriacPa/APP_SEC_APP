@@ -9,10 +9,10 @@ const articleSchema = new mongoose.Schema(
             minlength: 3,
             maxlength: 50,
         },
-        categories: {      
-            type: [String], // Array of strings
-            default: [],
-        },
+        categories: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Categorie',
+        }],
         body: {
             type: String,
             required: true,
@@ -29,8 +29,8 @@ const articleSchema = new mongoose.Schema(
             max: 5,
             default: 0,
         },
-                },
-                { timestamps: true } // Automatically create `createdAt` and `updatedAt`
+    },
+    { timestamps: true } // Automatically create `createdAt` and `updatedAt`
 );
 
 module.exports = mongoose.model('Article', articleSchema);

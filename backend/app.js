@@ -10,6 +10,7 @@ const resetPassRoutes = require('./api/resetPass');
 const cookieParser = require('cookie-parser');
 const commentRoutes = require('./api/comment');
 const rateRoutes = require('./api/rating');
+const categorie = require('./api/categorie');
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use('/api/resetPass', resetPassRoutes);
 app.use('/api/article', articleRoutes);
 app.use('/api/comment', commentRoutes);
 app.use('/api/rating', rateRoutes);
+app.use('/api/categorie', categorie);
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)

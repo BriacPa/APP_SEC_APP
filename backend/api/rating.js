@@ -53,7 +53,7 @@ const updateArticleRate = async (articleId) => {
     }
     else{
         const avgRate = totalRate / rates.length;
-        article.rating = avgRate;
+        article.rating = Math.round(avgRate);
         await article.save();
         console.log(`Article ${articleId} rate updated to ${avgRate}`);
     }
