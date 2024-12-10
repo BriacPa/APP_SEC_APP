@@ -142,6 +142,16 @@ const ManageUser = () => {
         }
     }
 
+    const handleDeleteUser = async () => {
+        try {
+            await axiosInstance.delete(`/user/del/${user._id}`, { withCredentials: true });
+            window.location.href = '/user-managment';
+        } catch (error) {
+            console.error('Failed to delete user:', error);
+        }
+    };
+
+
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -153,6 +163,7 @@ const ManageUser = () => {
     return (
         <div>
             <h1>{user.username}</h1>
+            <button onClick={()=>handleDeleteUser()}>Delete</button>
             <p>Email: {user.email}</p>
             <p>Role: {user.role}</p>
             <label htmlFor="role">Change Role:</label>

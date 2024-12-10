@@ -170,6 +170,44 @@ const sendDeleteAccountEmail = async (user) => {
     }
 };
 
+router.delete('/del/:id', verifyJWT, async (req, res) => {
+    console.log('/del/(user)');
+    const { id } = req.params;
+    const user = await User.findById(req.user.id);
+    const role = user.role;
+    const userID = req.user.id;
+    try {
+        const userToDelete = await User.findById(id);
+        if (!userToDelete) return res.status(404).json({ message: 'User not found' });
+        if (!(role === 'admin' || (role === 'moderator' && (userToDelete.role === 'author' || userToDelete.role === 'user')))) return res.status(403).json({ message: 'You do not have permission to delete this user' });
+        await userToDelete.deleteOne();
+        if (Comment.find({author: id})) {
+            await Comment.updateMany({ author: id }, { $unset: { author: "" } });
+        }
+        if (Article.find({author: id})) {
+            const articles = await Article.find({ author: id });
+            for (const article of articles) {
+            await Comment.deleteMany({ article: article._id });
+            }
+            await Article.deleteMany({ author: id });
+        }
+        if (Rates.find({author: id})) {
+            const ratedArticles = await Rates.distinct('article', { author: id });
+            await Rates.deleteMany({ author: id });
+            console.log(ratedArticles);
+            for (const articleId of ratedArticles) {
+                await updateArticleRate(articleId);
+            }
+
+        }
+        res.status(200).json({ message: 'User successfully deleted' });
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({ message: 'Failed to delete user' });    
+    }
+});
+
+
 // Handle account deletion
 router.get('/delete-account/:token', async (req, res) => {
     console.log("/delete-account");
