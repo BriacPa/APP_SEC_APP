@@ -175,7 +175,8 @@ const Articles = () => {
 
     const deleteComment = async (commentId) => {
         try {
-            await axiosInstance.delete(`/comment/del/${commentId}`, { withCredentials: true });
+            await axiosInstance.delete(`/comment/del?id=${commentId}`, { withCredentials: true });
+
             fetchComments();
         } catch (err) {
             setError('Failed to delete comment');

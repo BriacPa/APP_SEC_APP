@@ -23,7 +23,8 @@ const Comments = (user,setUser) => {
 
     const deleteComment = (commentId) => async () => {
         console.log('Deleting comment:', commentId);
-        await axiosInstance.delete(`/comment/del/${commentId}`, { withCredentials: true });
+        await axiosInstance.delete(`/comment/del?id=${commentId}`, { withCredentials: true });
+
         fetchComments();
     };
     
