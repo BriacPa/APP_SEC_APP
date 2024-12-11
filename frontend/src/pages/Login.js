@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axiosInstance from '../utils/axiosInstance';
+import axios from 'axios';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_REGEX = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
@@ -9,6 +10,18 @@ const PASSWORD_REGEX = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [isLogged, setIsLogged] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const fetchUser = async () => {
+        try {
+            const response = await axiosInstance.get('/user', { withCredentials: true });
+            setIsLogged(true);
+        } catch {
+            setIsLogged(false);
+            setIsLoading(false);
+        }
+    }
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -25,8 +38,22 @@ function Login() {
             alert('Login successful');
         } catch (err) {
             alert(err.response?.data || 'Error during login');
+        } finally {
+            fetchUser();
         }
     };
+
+    useEffect(() => {
+        fetchUser();
+    }, []);
+
+    if(isLogged) {
+        window.location.href = '/dashboard';
+    }
+
+    if(isLoading) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <form onSubmit={handleLogin}>
