@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../utils/axiosInstance';
+import { Container, Row, Col, Button, Form, Card, Alert } from 'react-bootstrap';
+import NavBar from '../components/NavBar';
 
 const Articles = () => {
     const [article, setArticle] = useState({});
@@ -26,11 +28,10 @@ const Articles = () => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const response = await axiosInstance.get('/user', {
-                    withCredentials: true,
-                });
+                const response = await axiosInstance.get('/user', { withCredentials: true });
                 setUser(response.data);
             } catch (err) {
+                console.error(err);
             } finally {
                 setLoading(false); // Mark loading as complete
             }
@@ -39,20 +40,15 @@ const Articles = () => {
         fetchUser();
     }, []);
 
-
     // Check user authentication
     useEffect(() => {
         const checkAuthentication = async () => {
             try {
-                await axiosInstance.get('/auth/isAuthenticated', {
-                    withCredentials: true,
-                });
+                await axiosInstance.get('/auth/isAuthenticated', { withCredentials: true });
                 setIsAuthenticated(true);
-                console.log('Authenticated');
             } catch (err) {
                 setIsAuthenticated(false);
-                console.log('Not Authenticated');
-            }  finally {
+            } finally {
                 setLoading2(false); // Mark loading as complete
             }
         };
@@ -92,7 +88,6 @@ const Articles = () => {
             setError('Article not found');
             return;
         }
-        console.log(isAuthenticated);
 
         try {
             if (!isAuthenticated) {
@@ -125,20 +120,12 @@ const Articles = () => {
     }, [article._id]); // Fetch comments whenever the article ID changes
 
     const canEdit = () => {
-        if(user.role === 'admin' || user._id === article.author?._id || user.role === 'moderator'){
-            return true;
-        } else {
-            return false;
-        }
-    }
+        return user.role === 'admin' || user._id === article.author?._id || user.role === 'moderator';
+    };
 
     const canEditCom = (comment) => {
-        if(user.role === 'admin' || user._id === comment.author?._id || user.role === 'moderator'){
-            return true;
-        } else {
-            return false;
-        }
-    }
+        return user.role === 'admin' || user._id === comment.author?._id || user.role === 'moderator';
+    };
 
     const handleRatingSubmit = async (e) => {
         e.preventDefault();
@@ -163,20 +150,13 @@ const Articles = () => {
             const response = await axiosInstance.get(`/article/article?title=${title}`);
             setArticle(response.data);
         } catch (err) {
-            setError('Failed to submit rating : '+ err.message);
+            setError('Failed to submit rating : ' + err.message);
         }
-    }
-
-
-    let strRate = article.rating + "/5";
-    if(article.rating === 0){
-        strRate = "No rating yet";
-    }
+    };
 
     const deleteComment = async (commentId) => {
         try {
             await axiosInstance.delete(`/comment/del?id=${commentId}`, { withCredentials: true });
-
             fetchComments();
         } catch (err) {
             setError('Failed to delete comment');
@@ -192,69 +172,118 @@ const Articles = () => {
         }
     };
 
+    let strRate = article.rating + "/5";
+    if (article.rating === 0) {
+        strRate = "No rating yet";
+    }
+
     if (loading || loading2) return <p>Loading...</p>;
 
     return (
         <div>
-            {error ? (
-                <p>Error: {error}</p>
-            ) : (
-                <>
-                    <h1>{article.title}</h1>
-                    {canEdit() ? <button onClick={() => DeleteArticle()}>delete Article</button> : null}
-                    <p>Created at: {new Date(article.createdAt).toLocaleString()}</p>
-                    <p>Categories: {article.categories?.join(', ')}</p>
-                    <p>Rating: {strRate}</p>    
-                    <p>{article.body}</p>
-                    <p>Author: {article.author?.username}</p>
+            <NavBar user/>
+            <Container className="mt-5 d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+                <Row className="w-100">
+                    <Col md={8} className="mx-auto">
+                        {error && <Alert variant="danger">{error}</Alert>}
+                        <Card>
+                            <Card.Body>
+                                <Card.Title>{article.title}</Card.Title>
+                                <Card.Text>
+                                    <strong>Created at:</strong> {new Date(article.createdAt).toLocaleString()}
+                                </Card.Text>
+                                <Card.Text>
+                                    <strong>Categories: </strong>{article.categories ? article.categories.map((category) => category.name).join(', ') : 'No categories'}
+                                </Card.Text>
+                                <Card.Text>
+                                    <strong>Rating:</strong> {strRate}
+                                </Card.Text>
+                                <Card.Text>{article.body}</Card.Text>
+                                <Card.Text>
+                                    <strong>Author:</strong> {article.author?.username}
+                                </Card.Text>
+                                {canEdit() && (
+                                    <Button variant="danger" onClick={DeleteArticle}>
+                                        Delete Article
+                                    </Button>
+                                )}
+                            </Card.Body>
+                        </Card>
 
-                    {isAuthenticated && (
-                        <>
-                            <div>
-                                <h4>Rate this Article</h4>
-                                <form onSubmit={handleRatingSubmit}>
-                                    <select value={rate} onChange={(e) => setRate(e.target.value)} required>
-                                        <option value="">Select a rating</option>
-                                        {[1, 2, 3, 4, 5].map((value) => (
-                                            <option key={value} value={value}>
-                                                {value}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <button type="submit">Submit Rating</button>
-                                </form>
-                            </div>
-                        </>
-                    )}
-                    <div>
-                                <h4>Comments</h4>
+                        {isAuthenticated && (
+                            <Card className="mt-3">
+                                <Card.Body>
+                                    <h5>Rate this Article</h5>
+                                    <Form onSubmit={handleRatingSubmit}>
+                                        <Form.Group controlId="rating">
+                                            <Form.Control
+                                                as="select"
+                                                value={rate}
+                                                onChange={(e) => setRate(e.target.value)}
+                                                required
+                                            >
+                                                <option value="">Select a rating</option>
+                                                {[1, 2, 3, 4, 5].map((value) => (
+                                                    <option key={value} value={value}>
+                                                        {value}
+                                                    </option>
+                                                ))}
+                                            </Form.Control>
+                                        </Form.Group>
+                                        <Button variant="primary" type="submit">
+                                            Submit Rating
+                                        </Button>
+                                    </Form>
+                                </Card.Body>
+                            </Card>
+                        )}
+
+                        <Card className="mt-3">
+                            <Card.Body>
+                                <h5>Comments</h5>
                                 {comments.length > 0 ? (
                                     comments.map((comment) => (
                                         <div key={comment._id}>
                                             <p>
-                                                {comment.author?.username || 'Anonymous'}: {comment.body} at {new Date(comment.createdAt).toLocaleString()}
+                                                <strong>{comment.author?.username || 'Anonymous'}</strong>: {comment.body}{' '}
+                                                <small>at {new Date(comment.createdAt).toLocaleString()}</small>
                                             </p>
-                                            {canEditCom(comment) ? <button onClick={() => deleteComment(comment._id)}>delete Comment</button> : null}
+                                            {canEditCom(comment) && (
+                                                <Button variant="danger" size="sm" onClick={() => deleteComment(comment._id)}>
+                                                    Delete Comment
+                                                </Button>
+                                            )}
                                         </div>
                                     ))
                                 ) : (
                                     <p>No comments yet.</p>
                                 )}
-                            </div>
-                    <div>
-                        <h4>Leave a Comment</h4>
-                        <form onSubmit={handleCommentSubmit}>
-                            <textarea
-                                value={comment}
-                                onChange={(e) => setComment(e.target.value)}
-                                placeholder="Write your comment here"
-                                required
-                            />
-                            <button type="submit">Submit</button>
-                        </form>
-                    </div>
-                </>
-            )}
+                            </Card.Body>
+                        </Card>
+
+                        <Card className="mt-3">
+                            <Card.Body>
+                                <h5>Leave a Comment</h5>
+                                <Form onSubmit={handleCommentSubmit}>
+                                    <Form.Group controlId="comment">
+                                        <Form.Control
+                                            as="textarea"
+                                            rows={3}
+                                            value={comment}
+                                            onChange={(e) => setComment(e.target.value)}
+                                            placeholder="Write your comment here"
+                                            required
+                                        />
+                                    </Form.Group>
+                                    <Button variant="primary" type="submit">
+                                        Submit Comment
+                                    </Button>
+                                </Form>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                </Row>
+            </Container>
         </div>
     );
 };

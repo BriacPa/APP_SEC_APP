@@ -13,6 +13,7 @@ const UserDash = ({ user, setUser, setError }) => {
     const changePass = () => {
         window.location.href = '/reset-password-logged';
     };
+    
     const deleteAccount = async () => {
         await axiosInstance.post('/user/delete-account-req', { withCredentials: true })
             .then((res) => {
@@ -32,20 +33,21 @@ const UserDash = ({ user, setUser, setError }) => {
             .catch((err) => {
                 console.error(err);
             });
-    }
+    };
+
     return (
-        <div>
-            <h1>Welcome, {user.username}!</h1>
+        <div className="container mt-4">
+            <h1 className="mb-4">Welcome, {user.username}!</h1>
             <p>Email: {user.email}</p>
-            <button onClick={changeMail}>Change Email</button>
-            <button onClick={changePass}>Reset Password</button>
-            <button onClick={deleteAccount}>Delete Account</button>
-            <p>Role: {user.role}</p>
-            {/* Use the LogoutButton component */}
+            <div className="d-grid gap-2">
+                <button onClick={changeMail} className="btn btn-primary">Change Email</button>
+                <button onClick={changePass} className="btn btn-warning">Reset Password</button>
+                <button onClick={deleteAccount} className="btn btn-danger">Delete Account</button>
+            </div>
+            <p className="mt-3">Role: {user.role}</p>
             <LogoutButton setUser={setUser} />
         </div>
     );
-
 }
 
 export default UserDash;

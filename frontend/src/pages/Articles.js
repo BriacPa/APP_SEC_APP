@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../utils/axiosInstance';
+import NavBar from '../components/NavBar';
+import { Nav, Container, Row, Col, Card, Button, Form } from 'react-bootstrap';
 
 const Articles = () => {
     const [articles, setArticles] = useState([]);
@@ -9,6 +11,20 @@ const Articles = () => {
     const [filteredArticles, setFilteredArticles] = useState([]);
     const [selectedCategories, setSelectCategories] = useState([]);
     const [isDescending, setIsDescending] = useState(false);
+    const [user, setUser] = useState({});
+
+    const fetchUser = async () => {
+        try {
+            const response = await axiosInstance.get('/user/me', { withCredentials: true });
+            setUser(response.data);
+        } catch (error) {
+            console.error('Failed to fetch user:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchUser();
+    }, []);
 
     const fetchArticles = async () => {
         try {
@@ -79,66 +95,108 @@ const Articles = () => {
 
     return (
         <div>
-            <h2>Articles</h2>
-            <input
-                type="text"
-                placeholder="Search articles..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-            />
-            <select onChange={(e) => sortArticles(e.target.value)}>
-                <option value="">Sort by</option>
-                <option value="date">Date</option>
-                <option value="rating">Rating</option>
-                <option value="title">Title</option>
-            </select>
-            <label>
-                <input
-                    type="checkbox"
-                    checked={isDescending}
-                    onChange={toggleSortOrder}
-                />
-                Inverse Sort Order
-            </label>
-            <div>
-                {categories.map((category) => (
-                    <label key={category._id}>
-                        <input
-                            type="checkbox"
-                            value={category.name}
-                            onChange={(e) => {
-                                if (e.target.checked) {
-                                    setSelectCategories([...selectedCategories, category.name]);
-                                } else {
-                                    setSelectCategories(selectedCategories.filter((name) => name !== category.name));
-                                }
-                            }}
+            <NavBar user={user} />
+            <Container className="mt-5">
+                {/* Search and Filters */}
+                <Row className="mb-4">
+                    <Col md={4}>
+                        <Form.Control
+                            type="text"
+                            placeholder="Search articles..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
                         />
-                        {category.name}
-                    </label>
-                ))}
-            </div>
+                    </Col>
 
-            {filteredArticles.length > 0 ? (
-                filteredArticles.map((article) => (
-                    <div key={article._id}>
-                        <h3>
-                            <a href={`/article/?title=${article.title}`}>{article.title}</a>
-                        </h3>
-                        <p>Categories: {article.categories.map((category) => category.name).join(', ')}</p>
-                        <p>Created at: {new Date(article.createdAt).toLocaleString()}</p>
-                        {article.rating === 0 ? (
-                            <p>Rating: No rating yet</p>
-                        ) : (
-                            <p>Rating: {article.rating}/5</p>
-                        )}
-                        <p>{article.body}</p>
-                        <p>Author: {article.author.username}</p>
-                    </div>
-                ))
-            ) : (
-                <p>No articles found.</p>
-            )}
+                    <Col md={2}>
+                        <Form.Select onChange={(e) => sortArticles(e.target.value)} className="mb-2">
+                            <option value="">Sort by</option>
+                            <option value="date">Date</option>
+                            <option value="rating">Rating</option>
+                            <option value="title">Title</option>
+                        </Form.Select>
+                    </Col>
+
+                    <Col md={2}>
+                        <Form.Check
+                            type="checkbox"
+                            label="Inverse Sort Order"
+                            checked={isDescending}
+                            onChange={toggleSortOrder}
+                        />
+                    </Col>
+                </Row>
+
+                {/* Categories Filter */}
+                <Row className="mb-4">
+                    <Col>
+                        <h5>Filter by Categories</h5>
+                        <div className="d-flex flex-wrap">
+                            {categories.map((category) => (
+                                <Form.Check
+                                    key={category._id}
+                                    type="checkbox"
+                                    label={category.name}
+                                    value={category.name}
+                                    checked={selectedCategories.includes(category.name)}
+                                    onChange={(e) => {
+                                        if (e.target.checked) {
+                                            setSelectCategories([...selectedCategories, category.name]);
+                                        } else {
+                                            setSelectCategories(
+                                                selectedCategories.filter((name) => name !== category.name)
+                                            );
+                                        }
+                                    }}
+                                    className="mr-3"
+                                />
+                            ))}
+                        </div>
+                    </Col>
+                </Row>
+
+                {/* Articles Listing */}
+                <Row>
+                    {filteredArticles.length > 0 ? (
+                        filteredArticles.map((article) => (
+                            <Col sm={12} md={6} lg={4} key={article._id} className="mb-4">
+                                <Card>
+                                    <Card.Body>
+                                        <Card.Title>
+                                            <a href={`/article/?title=${article.title}`}>{article.title}</a>
+                                        </Card.Title>
+                                        <Card.Text>
+                                            <strong>Categories:</strong>{' '}
+                                            {article.categories.map((category) => category.name).join(', ')}
+                                        </Card.Text>
+                                        <Card.Text>
+                                            <strong>Created at:</strong>{' '}
+                                            {new Date(article.createdAt).toLocaleString()}
+                                        </Card.Text>
+                                        <Card.Text>
+                                            {article.rating === 0 ? (
+        <Card.Text><strong>Rating:</strong> No rating yet</Card.Text>
+    ) : (
+        <Card.Text><strong>Rating:</strong> {article.rating}/5</Card.Text>
+    )}
+
+                                        </Card.Text>
+                                        <Card.Text>{article.body.substring(0, 150)}...</Card.Text>
+                                        <Card.Text>
+                                            <strong>Author:</strong> {article.author.username}
+                                        </Card.Text>
+                                        <Button variant="primary" href={`/article/?title=${article.title}`}>
+                                            Read more
+                                        </Button>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        ))
+                    ) : (
+                        <p>No articles found.</p>
+                    )}
+                </Row>
+            </Container>
         </div>
     );
 };

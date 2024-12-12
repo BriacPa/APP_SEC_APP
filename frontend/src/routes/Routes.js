@@ -15,7 +15,7 @@ import ChangeMail from '../pages/ChangeMail';
 import UserManagment from '../pages/UserManagment';
 import ManageUser from '../pages/ManageUser';
 import Categories from '../pages/Categories';
-
+import Test from '../pages/test';
 
 const App = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -48,7 +48,7 @@ const App = () => {
 
     if (loading) {
         // Return loading state while authentication check is in progress
-        return <div>Loading...</div>;
+        return <img className="loadingImage" src={require('../assets/images/loading.svg').default} alt="Logo" />;
     }
 
     return (
@@ -61,6 +61,7 @@ const App = () => {
                 <Route path="/reset-password-active" element={<ResetPasswordRes />} />
                 <Route path="/articles" element={<Articles />} />
                 <Route path="/article" element={<Article />} />
+                <Route path="/test" element={<Test />} />
 
                 {/* Protected Routes */}
                 <Route 

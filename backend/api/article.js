@@ -55,17 +55,25 @@ router.get('/allArticles', async (req, res) => {
 
 router.get('/article', async (req, res) => {
     console.log("/article");
-    const { title } = req.query ;
+    const { title } = req.query;
     console.log(title);
     if (!title) return res.status(400).send('Title is required');
+    
     try {
-        const article = await Article.findOne({ title }).populate('author', 'username');
+        // Populate both author and categories fields correctly
+        const article = await Article.findOne({ title })
+            .populate('author', 'username') // Populate the author with just the username
+            .populate('categories', 'name'); // Populate categories with the name field
+        
         if (!article) return res.status(404).send('Article not found');
+        
+        // Send back the populated article
         res.json(article);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
+
 
 router.post('/comment', verifyJWT, async (req, res) => {
     console.log("/comment");
