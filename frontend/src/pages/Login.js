@@ -39,7 +39,6 @@ function Login() {
         setIsSubmitting(true);
         try {
             await axiosInstance.post('/auth/login', { email, password });
-            alert('Login successful');
             fetchUser();
         } catch (err) {
             setErrorMessage(err.response?.data || 'Error during login');

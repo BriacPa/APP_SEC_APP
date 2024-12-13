@@ -15,7 +15,7 @@ import ChangeMail from '../pages/ChangeMail';
 import UserManagment from '../pages/UserManagment';
 import ManageUser from '../pages/ManageUser';
 import Categories from '../pages/Categories';
-import Test from '../pages/test';
+import Home from '../pages/Home';
 
 const App = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -55,13 +55,13 @@ const App = () => {
         <Router>
             <Routes>
                 {/* Public Routes */}
+                <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/reset-password" element={<ResetPasswordReq />} />
                 <Route path="/reset-password-active" element={<ResetPasswordRes />} />
                 <Route path="/articles" element={<Articles />} />
-                <Route path="/article" element={<Article />} />
-                <Route path="/test" element={<Test />} />
+                <Route path="/articles/open" element={<Article />} />
 
                 {/* Protected Routes */}
                 <Route 
@@ -83,7 +83,7 @@ const App = () => {
                     } 
                 />
                 <Route
-                    path="/changeMail"
+                    path="/dashboard/changeMail"
                     element={
                         <ProtectedRoute isAuthenticated={isAuthenticated} 
                         requiredRole={['user','author','moderator','admin']} 
@@ -93,7 +93,7 @@ const App = () => {
                     }
                 />
                 <Route
-                    path="/reset-password-logged"
+                    path="/dashboard/reset-password-logged"
                     element={
                         <ProtectedRoute isAuthenticated={isAuthenticated} 
                         requiredRole={['user','author','moderator','admin']} 
@@ -113,7 +113,7 @@ const App = () => {
                     }
                 />
                 <Route
-                    path="/manage-user"
+                    path="/user-managment/manage-user"
                     element={
                         <ProtectedRoute isAuthenticated={isAuthenticated} 
                         requiredRole={['admin','moderator']} 

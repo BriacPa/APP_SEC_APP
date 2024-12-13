@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axiosInstance from '../utils/axiosInstance';
 import NavBar from '../components/NavBar';
 import { Nav, Container, Row, Col, Card, Button, Form } from 'react-bootstrap';
+import { FaStar, FaRegStar } from 'react-icons/fa';
 
 const Articles = () => {
     const [articles, setArticles] = useState([]);
@@ -12,10 +13,11 @@ const Articles = () => {
     const [selectedCategories, setSelectCategories] = useState([]);
     const [isDescending, setIsDescending] = useState(false);
     const [user, setUser] = useState({});
+    const [page, setPage] = useState(1);
 
     const fetchUser = async () => {
         try {
-            const response = await axiosInstance.get('/user/me', { withCredentials: true });
+            const response = await axiosInstance.get('/user/', { withCredentials: true });
             setUser(response.data);
         } catch (error) {
             console.error('Failed to fetch user:', error);
@@ -93,9 +95,29 @@ const Articles = () => {
         setFilteredArticles((prevArticles) => [...prevArticles].reverse());
     };
 
+    // Function to display stars for a given rating (out of 5)
+    const renderStars = (rating) => {
+        const fullStars = Math.floor(rating);
+        const halfStar = rating % 1 >= 0.5;
+        const emptyStars = 5 - Math.ceil(rating);
+
+        return (
+            <>
+                {[...Array(fullStars)].map((_, i) => (
+                    <FaStar key={`full-${i}`} color="gold" />
+                ))}
+                {halfStar && <FaStar key="half" color="gold" />}
+                {[...Array(emptyStars)].map((_, i) => (
+                    <FaRegStar key={`empty-${i}`} color="gold" />
+                ))}
+            </>
+        );
+    };
+
     return (
         <div>
             <NavBar user={user} />
+            <div class="bod2">
             <Container className="mt-5">
                 {/* Search and Filters */}
                 <Row className="mb-4">
@@ -136,7 +158,7 @@ const Articles = () => {
                                 <Form.Check
                                     key={category._id}
                                     type="checkbox"
-                                    label={category.name}
+                                    label={`${category.name}`}
                                     value={category.name}
                                     checked={selectedCategories.includes(category.name)}
                                     onChange={(e) => {
@@ -148,7 +170,8 @@ const Articles = () => {
                                             );
                                         }
                                     }}
-                                    className="mr-3"
+                                    className="mr-3 mb-2"
+                                    custom
                                 />
                             ))}
                         </div>
@@ -163,7 +186,7 @@ const Articles = () => {
                                 <Card>
                                     <Card.Body>
                                         <Card.Title>
-                                            <a href={`/article/?title=${article.title}`}>{article.title}</a>
+                                            <a href={`/articles/open/?title=${article.title}`}>{article.title}</a>
                                         </Card.Title>
                                         <Card.Text>
                                             <strong>Categories:</strong>{' '}
@@ -174,12 +197,7 @@ const Articles = () => {
                                             {new Date(article.createdAt).toLocaleString()}
                                         </Card.Text>
                                         <Card.Text>
-                                            {article.rating === 0 ? (
-        <Card.Text><strong>Rating:</strong> No rating yet</Card.Text>
-    ) : (
-        <Card.Text><strong>Rating:</strong> {article.rating}/5</Card.Text>
-    )}
-
+                                            <strong>Rating:</strong> {renderStars(article.rating)}
                                         </Card.Text>
                                         <Card.Text>{article.body.substring(0, 150)}...</Card.Text>
                                         <Card.Text>
@@ -197,6 +215,7 @@ const Articles = () => {
                     )}
                 </Row>
             </Container>
+        </div>
         </div>
     );
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../utils/axiosInstance';
 import { Container, Row, Col, Button, Form, Card, Alert } from 'react-bootstrap';
+import { FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa'; // Import icons for stars
 import NavBar from '../components/NavBar';
 
 const Articles = () => {
@@ -10,7 +11,7 @@ const Articles = () => {
     const [comment, setComment] = useState('');
     const [comments, setComments] = useState([]);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [rate, setRate] = useState('');
+    const [rate, setRate] = useState(0); // Store the rating as a number
     const [user, setUser] = useState({});
     const [loading, setLoading] = useState(true); // State to track loading
     const [loading2, setLoading2] = useState(true); // State to track loading
@@ -30,6 +31,7 @@ const Articles = () => {
             try {
                 const response = await axiosInstance.get('/user', { withCredentials: true });
                 setUser(response.data);
+                console.log(response.data);
             } catch (err) {
                 console.error(err);
             } finally {
@@ -145,7 +147,7 @@ const Articles = () => {
                     withCredentials: true,
                 }
             );
-            setRate(''); // Clear the rating input after successful submission
+            setRate(0); // Clear the rating input after successful submission
             // Fetch article after submitting rating
             const response = await axiosInstance.get(`/article/article?title=${title}`);
             setArticle(response.data);
@@ -179,10 +181,26 @@ const Articles = () => {
 
     if (loading || loading2) return <p>Loading...</p>;
 
+    // Render stars based on the current rating
+    const renderStars = (rating) => {
+        const stars = [];
+        for (let i = 1; i <= 5; i++) {
+            if (i <= rating) {
+                stars.push(<FaStar key={i} color="gold" />);
+            } else if (i - rating < 1) {
+                stars.push(<FaStarHalfAlt key={i} color="gold" />);
+            } else {
+                stars.push(<FaRegStar key={i} color="gold" />);
+            }
+        }
+        return stars;
+    };
+
     return (
         <div>
-            <NavBar user/>
-            <Container className="mt-5 d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+            <NavBar user={user}/>
+            <div class="bod2">
+            <Container className="mt-5 d-flex justify-content-center align-items-center" style={{ minHeight: '100vh'}}>
                 <Row className="w-100">
                     <Col md={8} className="mx-auto">
                         {error && <Alert variant="danger">{error}</Alert>}
@@ -196,7 +214,7 @@ const Articles = () => {
                                     <strong>Categories: </strong>{article.categories ? article.categories.map((category) => category.name).join(', ') : 'No categories'}
                                 </Card.Text>
                                 <Card.Text>
-                                    <strong>Rating:</strong> {strRate}
+                                    <strong>Rating:</strong> {renderStars(article.rating)}
                                 </Card.Text>
                                 <Card.Text>{article.body}</Card.Text>
                                 <Card.Text>
@@ -214,26 +232,20 @@ const Articles = () => {
                             <Card className="mt-3">
                                 <Card.Body>
                                     <h5>Rate this Article</h5>
-                                    <Form onSubmit={handleRatingSubmit}>
-                                        <Form.Group controlId="rating">
-                                            <Form.Control
-                                                as="select"
-                                                value={rate}
-                                                onChange={(e) => setRate(e.target.value)}
-                                                required
+                                    <div>
+                                        {[1, 2, 3, 4, 5].map((i) => (
+                                            <span
+                                                key={i}
+                                                onClick={() => setRate(i)}
+                                                style={{ cursor: 'pointer', fontSize: '24px' }}
                                             >
-                                                <option value="">Select a rating</option>
-                                                {[1, 2, 3, 4, 5].map((value) => (
-                                                    <option key={value} value={value}>
-                                                        {value}
-                                                    </option>
-                                                ))}
-                                            </Form.Control>
-                                        </Form.Group>
-                                        <Button variant="primary" type="submit">
-                                            Submit Rating
-                                        </Button>
-                                    </Form>
+                                                {i <= rate ? <FaStar color="gold" /> : <FaRegStar color="gold" />}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <Button variant="primary" onClick={handleRatingSubmit} className="mt-2">
+                                        Submit Rating
+                                    </Button>
                                 </Card.Body>
                             </Card>
                         )}
@@ -284,6 +296,7 @@ const Articles = () => {
                     </Col>
                 </Row>
             </Container>
+        </div>
         </div>
     );
 };

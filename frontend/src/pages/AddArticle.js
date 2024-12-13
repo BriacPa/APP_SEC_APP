@@ -55,8 +55,8 @@ function Reset() {
 
     return (
         <div>
-            <NavBar user/>
-        <div className="container mt-4">
+            <NavBar user = {user}/>
+        <div className="container mt-4" class="bod">
             <form onSubmit={handleSubmit} className="bg-light p-4 rounded shadow-sm">
                 <h2 className="mb-4">New Article</h2>
 

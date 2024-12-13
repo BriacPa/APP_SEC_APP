@@ -15,3 +15,15 @@ code {
 :root {
   --bs-primary: #ff5733; /* Replace this with your custom color */
 }
+
+.bod {
+  margin-top : 60px;
+}
+
+.bod2{
+  margin-top : 90px;
+}
+
+.bod3 {
+  margin-top: 60px;
+}

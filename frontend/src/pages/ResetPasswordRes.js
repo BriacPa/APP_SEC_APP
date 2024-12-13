@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { Container, Form, Button, Alert } from 'react-bootstrap';
+import NavBar from '../components/NavBar';
+
 
 const PASSWORD_REGEX = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
 
@@ -19,7 +22,6 @@ function Reset() {
         const token = urlParams.get('token');
         const code = urlParams.get('code');
 
-        
         if (!token) {
             setError('Invalid or missing token.');
             return;
@@ -45,7 +47,7 @@ function Reset() {
         }
 
         try {
-            await axios.post('http://localhost:5000/api/resetPass/RP', {token, password, confirmPassword, code });
+            await axios.post('http://localhost:5000/api/resetPass/RP', { token, password, confirmPassword, code });
             alert('Reset successful');
         } catch (err) {
             setError(err.response?.data?.error || 'Error during reset');
@@ -53,25 +55,41 @@ function Reset() {
     };
 
     return (
-        <form onSubmit={handleRegister}>
-            <h2>New Password</h2>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-            />
-            <input
-                type="password"
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-            />
-            <button type="submit">Submit</button>
-        </form>
+        <Container className="mt-5">
+            <div className="d-flex justify-content-center">
+                <Form onSubmit={handleRegister} style={{ maxWidth: '400px', width: '100%' }}>
+                    <h2 className="mb-4 text-center">Set New Password</h2>
+
+                    {error && <Alert variant="danger">{error}</Alert>}
+
+                    <Form.Group className="mb-3" controlId="formBasicPassword">
+                        <Form.Label>Password</Form.Label>
+                        <Form.Control
+                            type="password"
+                            placeholder="Enter new password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </Form.Group>
+
+                    <Form.Group className="mb-3" controlId="formConfirmPassword">
+                        <Form.Label>Confirm Password</Form.Label>
+                        <Form.Control
+                            type="password"
+                            placeholder="Confirm new password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
+                        />
+                    </Form.Group>
+
+                    <Button variant="primary" type="submit" block>
+                        Submit
+                    </Button>
+                </Form>
+            </div>
+        </Container>
     );
 }
 
