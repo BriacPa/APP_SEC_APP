@@ -2,6 +2,7 @@ import React from 'react';
 import useFetchUserData from '../hooks/useFetchUserData';
 import axiosInstance from '../utils/axiosInstance';
 import NavBar from '../components/NavBar';
+import { useNavigate } from 'react-router-dom';
 
 function Reset() {
     const { user, loading } = useFetchUserData();
@@ -10,6 +11,8 @@ function Reset() {
     const [categories, setCategories] = React.useState([]);
     const [keywordsArray, setKeywordsArray] = React.useState([]);
     const [isLoading, setIsLoading] = React.useState(false);
+
+    const navigate = useNavigate();
 
     const getCategorie = async () => {
         try {
@@ -48,7 +51,9 @@ function Reset() {
                 { title, body, categories: keywordsArray },
                 { withCredentials: true }
             );
-            alert('Article added successfully!');
+            navigate(`/articles/open/?title=${title}`);
+
+            
         } catch (error) {
             alert('Error adding article: ' + (error.response?.data?.error || error.message));
         }

@@ -217,7 +217,7 @@ const ManageUser = () => {
                     <tbody>
                         {articles.map((article) => (
                             <tr key={article._id}>
-                                <td><a href={`/article/?title=${article.title}`}>{article.title}</a></td>
+                                <td><a href={`/articles/open/?title=${article.title}`}>{article.title}</a></td>
                                 <td>{article.createdAt}</td>
                                 <td>{article.updatedAt}</td>
                                 <td><Button variant="danger" onClick={() => handleDeleteArt(article._id)}>Delete</Button></td>
@@ -240,7 +240,7 @@ const ManageUser = () => {
                     <tbody>
                         {comments.map((comment) => (
                             <tr key={comment._id}>
-                                <td><a href={`/article/?title=${comment.article.title}`}>{comment.article.title}</a></td>
+                                <td><a href={`/articles/open/?title=${comment.article.title}`}>{comment.article.title}</a></td>
                                 <td>{comment.body}</td>
                                 <td>{comment.createdAt}</td>
                                 <td>{comment.updatedAt}</td>
@@ -264,7 +264,7 @@ const ManageUser = () => {
                     <tbody>
                         {ratings.map((rating) => (
                             <tr key={rating._id}>
-                                <td><a href={`/article/?title=${rating.article.title}`}>{rating.article.title}</a></td>
+                                <td><a href={`/articles/open/?title=${rating.article.title}`}>{rating.article.title}</a></td>
                                 <td>{renderStars(rating.rate)}</td> {/* Render stars here */}
                                 <td>{rating.createdAt}</td>
                                 <td>{rating.updatedAt}</td>
