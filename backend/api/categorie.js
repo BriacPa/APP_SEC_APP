@@ -4,7 +4,6 @@ const Article = require('../models/article');
 const router = require('express').Router();
 
 router.get('/', async (req, res) => {
-    console.log("/categorie");
     try {
         const categories = await Categorie.find().sort({ name: 1 });
         res.json(categories);
@@ -14,7 +13,6 @@ router.get('/', async (req, res) => {
 });
 
 router.delete('/del/:id', async (req, res) => {
-    console.log("/categorie/del");
     if (!req.params.id) return res.status(400).send('ID is required');
     try {
         await Categorie.findByIdAndDelete(req.params.id);
@@ -25,9 +23,7 @@ router.delete('/del/:id', async (req, res) => {
     }
 });
 
-
 router.post('/add', async (req, res) => {
-    console.log("/categorie/add");
     if (!req.body.name) return res.status(400).send('Name is required');
     try {
         await Categorie.create({ name: req.body.name });
@@ -38,4 +34,3 @@ router.post('/add', async (req, res) => {
 });
 
 module.exports = router;
-

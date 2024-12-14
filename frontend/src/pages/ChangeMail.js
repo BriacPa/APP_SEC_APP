@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../utils/axiosInstance";
-import { Container, Form, Button, Alert, Spinner } from "react-bootstrap";
+import { Container, Form, Button, Alert } from "react-bootstrap";
 import NavBar from '../components/NavBar';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -19,7 +19,6 @@ const ChangeMail = () => {
                 setUser(response.data);
                 setLoading(false); // Set loading to false once the user is fetched
             } catch (error) {
-                console.error('Failed to fetch user:', error);
                 setLoading(false); // Set loading to false even if the fetch fails
             }
         };
@@ -51,8 +50,8 @@ const ChangeMail = () => {
     // Conditionally render the NavBar if the user is fetched
     if (loading) {
         return (
-            <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
-                <Spinner animation="border" variant="primary" />
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <img className="loadingImage" src={require('../assets/images/loading.svg').default} alt="Loading" />
             </div>
         );
     }
@@ -61,7 +60,7 @@ const ChangeMail = () => {
         <>
             <NavBar user={user} /> 
             <div className="d-flex align-items-center justify-content-center vh-100">
-            <Container>
+                <Container>
                     <div className="d-flex justify-content-center">
                         <Form onSubmit={submitEmail} style={{ maxWidth: '400px', width: '100%' }}>
                             <h2 className="mb-4 text-center">Change Email</h2>
@@ -83,7 +82,7 @@ const ChangeMail = () => {
                             <Button 
                                 variant="primary" 
                                 type="submit" 
-                                block 
+                                className="w-100" // Replaced block with w-100 for full width
                                 disabled={!EMAIL_REGEX.test(email)} // Disable button if email format is invalid
                             >
                                 Change Email

@@ -10,7 +10,6 @@ const RatingDash = ({ user, setUser }) => {
                 setRating(res.data);
             })
             .catch((err) => {
-                console.error(err);
             });
     };
 
@@ -30,7 +29,7 @@ const RatingDash = ({ user, setUser }) => {
                 <div key={rate._id} className="card mb-3">
                     <div className="card-body">
                         <p className="card-text">
-                            Article: <a href={`/article/?title=${rate.article.title}`}>{rate.article.title}</a>
+                            Article: <a href={`/articles/open/?title=${rate.article.title}`}>{rate.article.title}</a>
                             - Value: {rate.rate}/5 at {new Date(rate.createdAt).toLocaleString()}
                         </p>
                         <button onClick={deleteRating(rate._id)} className="btn btn-danger btn-sm">Delete</button>

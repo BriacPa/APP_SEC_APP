@@ -7,14 +7,13 @@ require('dotenv').config();
 
 const router = express.Router();
 
-//fetch user
 router.post('/', async (req, res) => {
     console.log("/resetPass");
     try {
         const email = req.body.email.toLowerCase();
         const user = await User.findOne({ email });
         if (user) {
-            sendVerificationEmail(user);
+            sendResetPassword(user);
             res.json('Check your email');
         }
     } catch (error) {
@@ -23,19 +22,17 @@ router.post('/', async (req, res) => {
     }
 });
 
-// Create a transporter object using Zoho's SMTP transport
 const transporter = nodemailer.createTransport({
-    host: process.env.MAIL_HOST, // smtp.zoho.eu
-    port: process.env.MAIL_PORT, // 465
-    secure: true, // true for 465 port (SSL)
+    host: process.env.MAIL_HOST,
+    port: process.env.MAIL_PORT,
+    secure: true,
     auth: {
-        user: process.env.MAIL_USER, // your Zoho email address
-        pass: process.env.MAIL_PASS, // your Zoho app-specific password
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS,
     }
 });
 
-// Send verification email after registration
-const sendVerificationEmail = async (user) => {
+const sendResetPassword = async (user) => {
     const token = jwt.sign({ userId: user._id }, 'secret-key', { expiresIn: '1h' });
     const code = crypto.randomBytes(32).toString('hex');
     user.resetCode = code;
@@ -43,11 +40,95 @@ const sendVerificationEmail = async (user) => {
     const ResetUrl = `http://localhost:3000/reset-password-active/?token=${token}&code=${code}`;
     console.log(ResetUrl);
 
+    const htmlContent = `
+        <html>
+            <head>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .container {
+                        max-width: 600px;
+                        margin: 0 auto;
+                        padding: 20px;
+                    }
+                    .btn-primary {
+                        background-color: #00628e;
+                        border: 1px solid #00628e;
+                        padding: 12px 30px;
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 5px;
+                        font-size: 16px;
+                        display: inline-block;
+                    }
+                    .btn-primary:hover {
+                        background-color: #0056b3;
+                        border-color: #0056b3;
+                        color: white;
+                    }
+                    .card {
+                        border-radius: 10px;
+                        border: 1px solid #ddd;
+                        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                    }
+                    .card-header {
+                        background-color: #f8f9fa;
+                        padding: 15px;
+                        text-align: center;
+                        font-weight: bold;
+                        border-top-left-radius: 10px;
+                        border-top-right-radius: 10px;
+                    }
+                    .card-body {
+                        padding: 20px;
+                    }
+                    .footer {
+                        font-size: 12px;
+                        text-align: center;
+                        padding: 20px;
+                        color: #777;
+                    }
+                    .confirmation-line {
+                        margin: 20px 0;
+                        border-top: 2px solid #ddd;
+                    }
+                </style>
+            </head>
+            <body style="background-color: #f4f4f4; padding: 30px;">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">
+                            Password Reset
+                        </div>
+                        <div class="card-body">
+                            <p>Dear ${user.username},</p>
+                            <p>Please click the link below to change your password:</p>
+                            
+                            <div class="confirmation-line"></div>
+                            
+                            <p>
+                                <a href="${ResetUrl}" class="btn-primary">Verify Email</a>
+                            </p>
+                            
+                            <p>If you were not at the orgin of this request, please ignore this email.</p>
+                        </div>
+                    </div>
+                    <div class="footer">
+                        <p>Best regards,<br/>Your App Team</p>
+                    </div>
+                </div>
+            </body>
+        </html>
+    `;
+
     const mailOptions = {
-        from: process.env.MAIL_USER,  // Zoho email address
+        from: process.env.MAIL_USER,
         to: user.email,
-        subject: 'Email Reset Password',
-        text: `Click the following link to verify your email: ${ResetUrl}`,
+        subject: 'Pasword Reset',
+        html: htmlContent,
     };
 
     try {
@@ -58,13 +139,11 @@ const sendVerificationEmail = async (user) => {
     }
 };
 
-// Email verification endpoint
 router.post('/RP', async (req, res) => {
     console.log("/resetPass/RP");
     const {token, password, confirmPassword, code } = req.body;
 
     try {
-
         const decoded = jwt.verify(token, 'secret-key');
         const user = await User.findById(decoded.userId);
 
@@ -76,7 +155,6 @@ router.post('/RP', async (req, res) => {
             console.log('code not found');
             return res.status(400).send('Invalid code');
         }
-        // Mark email as verified
         if (password !== confirmPassword) return res.status(400).send('Passwords do not match');
         user.password = password;
         user.resetCode = null;    

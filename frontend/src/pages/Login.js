@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../utils/axiosInstance';
-import axios from 'axios';
-import { Button, Alert, Spinner, Container, Row, Col, Form } from 'react-bootstrap';
+import { Button, Alert, Container, Row, Col, Form } from 'react-bootstrap';
+import NavBar from '../components/NavBar';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_REGEX = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
@@ -13,10 +13,12 @@ function Login() {
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [user, setUser] = useState({});
 
     const fetchUser = async () => {
         try {
             const response = await axiosInstance.get('/user', { withCredentials: true });
+            setUser(response.data);
             setIsLogged(true);
         } catch {
             setIsLogged(false);
@@ -57,13 +59,15 @@ function Login() {
 
     if (isLoading) {
         return (
-            <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
-                <Spinner animation="border" variant="primary" />
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <img className="loadingImage" src={require('../assets/images/loading.svg').default} alt="Loading" />
             </div>
         );
     }
 
     return (
+        <>
+        <NavBar user={user} />
         <Container fluid="md" className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
             <Row className="w-100">
                 <Col md={6} lg={4} className="mx-auto p-4 border rounded shadow-lg bg-light">
@@ -100,10 +104,12 @@ function Login() {
                     </Form>
                     <div className="text-center mt-3">
                         <p>Don't have an account? <a href="/register">Sign up</a></p>
+                        <p><a href="/reset-password">Forgot your password?</a></p>
                     </div>
                 </Col>
             </Row>
         </Container>
+        </>
     );
 }
 

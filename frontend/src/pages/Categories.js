@@ -7,16 +7,18 @@ const Categories = () => {
     const [categories, setCategories] = useState([]);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const [user, setUser] = useState(null);  // Initialize user as null
+    const [user, setUser] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading2, setIsLoading2] = useState(true);
 
     useEffect(() => {
         const fetchUser = async () => {
             try {
                 const response = await axiosInstance.get('/user/', { withCredentials: true });
                 setUser(response.data);
-                console.log(response.data);
             } catch (error) {
-                console.error('Failed to fetch user:', error);
+            } finally {
+                setIsLoading(false);
             }
         };
         fetchUser();
@@ -28,7 +30,8 @@ const Categories = () => {
             setCategories(response.data);
         } catch (error) {
             setError('Failed to fetch categories.');
-            console.error('Failed to fetch categories:', error);
+        } finally {
+            setIsLoading2(false);
         }
     };
 
@@ -40,10 +43,9 @@ const Categories = () => {
         try {
             await axiosInstance.delete(`/categorie/del/${id}`, { withCredentials: true });
             setSuccess('Category deleted successfully!');
-            fetchCategories(); // Refresh categories after deletion
+            fetchCategories();
         } catch (error) {
             setError('Failed to delete category.');
-            console.error('Failed to delete category:', error);
         }
     };
 
@@ -56,63 +58,68 @@ const Categories = () => {
             fetchCategories();
         } catch (error) {
             setError('Failed to add category.');
-            console.error('Failed to add category:', error);
         }
     };
 
+    if (isLoading || isLoading2) {
+        return (
+            <div style={{   display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <img className="loadingImage" src={require('../assets/images/loading.svg').default} alt="Loading" />
+            </div>
+        );
+    }
+
     return (
         <>
-            {/* Check if user is available before rendering NavBar */}
             {user ? (
                 <NavBar user={user} />
             ) : (
-                <div>Loading...</div> // Show a loading message while user is being fetched
+                <div>Loading...</div>
             )}
-            <div class="bod2">
-            <Container className="mt-5">
-                <h2 className="text-center mb-4">Categories</h2>
+            <div className="bod2">
+                <Container className="mt-5">
+                    <h2 className="text-center mb-4">Categories</h2>
 
-                {error && <Alert variant="danger">{error}</Alert>}
-                {success && <Alert variant="success">{success}</Alert>}
+                    {error && <Alert variant="danger">{error}</Alert>}
+                    {success && <Alert variant="success">{success}</Alert>}
 
-                <Table striped bordered hover>
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Delete</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {categories.map((categorie) => (
-                            <tr key={categorie._id}>
-                                <td>{categorie.name}</td>
-                                <td>
-                                    <Button variant="danger" onClick={() => deleteCategorie(categorie._id)}>
-                                        Delete
-                                    </Button>
-                                </td>
+                    <Table striped bordered hover>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Delete</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </Table>
+                        </thead>
+                        <tbody>
+                            {categories.map((categorie) => (
+                                <tr key={categorie._id}>
+                                    <td>{categorie.name}</td>
+                                    <td>
+                                        <Button variant="danger" onClick={() => deleteCategorie(categorie._id)}>
+                                            Delete
+                                        </Button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
 
-                <Form onSubmit={addCategorie}>
-                    <Form.Group className="mb-3">
-                        <Form.Label>New Category</Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="categoryName"
-                            placeholder="Enter new category name"
-                            required
-                        />
-                    </Form.Group>
+                    <Form onSubmit={addCategorie}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>New Category</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="categoryName"
+                                placeholder="Enter new category name"
+                                required
+                            />
+                        </Form.Group>
 
-                    <Button variant="primary" type="submit">Add Category</Button>
-                </Form>
-            </Container>
+                        <Button variant="primary" type="submit">Add Category</Button>
+                    </Form>
+                </Container>
             </div>
         </>
-        
     );
 };
 

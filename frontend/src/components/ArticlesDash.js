@@ -10,7 +10,6 @@ const ArticleDash = ({ user, setUser }) => {
                 setArticles(res.data);
             })
             .catch((err) => {
-                console.error(err);
             });
     };
 
@@ -30,8 +29,8 @@ const ArticleDash = ({ user, setUser }) => {
                 <div key={article._id} className="card mb-3">
                     <div className="card-body">
                         <p className="card-text">
-                            Article: <a href={`/article/?title=${article.title}`}>{article.title}</a> 
-                            at {new Date(article.createdAt).toLocaleString()}
+                            Article: <a href={`/articles/open/?title=${article.title}`}>{article.title}</a> 
+                            {' '}at {new Date(article.createdAt).toLocaleString()}
                         </p>
                         <button onClick={deleteArticle(article._id)} className="btn btn-danger btn-sm">Delete</button>
                     </div>

@@ -1,18 +1,20 @@
 import { useState, useEffect } from 'react';
 import NavBar from '../components/NavBar';
+import axiosInstance from '../utils/axiosInstance';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Home = () => {
     const [user, setUser] = useState({});
+    const [loading, setLoading] = useState(true);
 
     const fetchUser = async () => {
         try {
-            const response = await fetch('/api/user', { credentials: 'include' });
-            const data = await response.json();
-            setUser(data);
+            const response = await axiosInstance.get('/user/', { withCredentials: true });
+            setUser(response.data);
         } catch (error) {
             setUser({});
-            console.error('Error fetching user:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -20,9 +22,18 @@ const Home = () => {
         fetchUser();
     }, []);
 
+    if (loading) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <img className="loadingImage" src={require('../assets/images/loading.svg').default} alt="Loading" />
+            </div>
+        );
+    }
+
     return (
-        <div className="bod">
+            <>
             <NavBar user={user} />
+            <div className="bod">
             <div className="d-flex align-items-center justify-content-center vh-100 bg-light">
                 <div className="container text-center py-5">
                     <h1 className="display-4 text-primary mb-4">Welcome to the Home Page</h1>
@@ -39,7 +50,6 @@ const Home = () => {
 
                     <div className="flip-container mt-4 mb-4">
                         <div className="flipper">
-                            {/* Front Side: Logo */}
                             <div className="front">
                                 <img
                                     src={require('../assets/images/put.png')}
@@ -47,8 +57,6 @@ const Home = () => {
                                     className="img-fluid logo"
                                 />
                             </div>
-
-                            {/* Back Side: Kilroy Image */}
                             <div className="back">
                                 <img
                                     src={require('../assets/images/kilroy.png')}
@@ -75,27 +83,28 @@ const Home = () => {
                 </div>
             </div>
 
-            {/* Inline CSS for Flip Animation and Disk */}
-            <style jsx>{`
+            {/* Removed the jsx attribute to fix the warning */}
+            <style>
+                {`
                 .flip-container {
-                    perspective: 1000px; /* Gives depth to the 3D effect */
-                    display: inline-block; /* Ensures the flip container is only as wide as its contents */
+                    perspective: 1000px;
+                    display: inline-block;
                     justify-content: center;
                     align-items: center;
-                    background-color: transparent; /* Ensure the container has a transparent background */
-                    cursor: pointer; /* Makes it clear that it's interactive */
+                    background-color: transparent;
+                    cursor: pointer;
                 }
 
                 .flipper {
-                    width: 300px; /* Width of the flip container */
-                    height: 300px; /* Height of the flip container */
+                    width: 300px;
+                    height: 300px;
                     transform-style: preserve-3d;
                     transition: transform 0.6s;
                     position: relative;
                 }
 
                 .flip-container:hover .flipper {
-                    transform: rotateY(180deg); /* Flip the container when hovered */
+                    transform: rotateY(180deg);
                 }
 
                 .front, .back {
@@ -104,30 +113,30 @@ const Home = () => {
                     left: 0;
                     right: 0;
                     bottom: 0;
-                    backface-visibility: hidden; /* Prevents the back from showing when flipped */
+                    backface-visibility: hidden;
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                    background-color: transparent; /* Ensure background is transparent */
+                    background-color: transparent;
                 }
 
                 .front {
-                    /* Ensure the front side has the image */
-                    background-color: transparent; /* Optional: remove background */
+                    background-color: transparent;
                 }
 
                 .back {
-                    /* Ensure the back side has the second image */
-                    transform: rotateY(180deg); /* Make the back side rotate 180 degrees */
-                    background-color: transparent; /* Optional: remove background */
+                    transform: rotateY(180deg);
+                    background-color: transparent;
                 }
 
                 .logo, .kilroy {
                     max-width: 100%;
                     max-height: 100%;
                 }
-            `}</style>
+                `}
+            </style>
         </div>
+        </>
     );
 }
 

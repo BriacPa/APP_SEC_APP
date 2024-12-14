@@ -10,13 +10,12 @@ const Comments = ({ user, setUser }) => {
                 setCommentsV(res.data);
             })
             .catch((err) => {
-                console.error(err);
             });
     }
 
     useEffect(() => {
         fetchComments();
-    }, []); // Fetch comments only once when the component mounts
+    }, []);
 
     const deleteComment = (commentId) => async () => {
         console.log('Deleting comment:', commentId);
@@ -34,7 +33,7 @@ const Comments = ({ user, setUser }) => {
                         <p className="card-text">
                             Article:{" "}
                             {comment.article ? (
-                                <a href={`/article/?title=${comment.article.title}`}>
+                                <a href={`/articles/open/?title=${comment.article.title}`}>
                                     {comment.article.title}
                                 </a>
                             ) : (

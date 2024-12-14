@@ -11,6 +11,11 @@ const ManageUser = () => {
     const [articles, setArticles] = useState([]);
     const [comments, setComments] = useState([]);
     const [ratings, setRatings] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading2, setIsLoading2] = useState(true);
+    const [isLoading3, setIsLoading3] = useState(true);
+    const [isLoading4, setIsLoading4] = useState(true);
+
 
     useEffect(() => {
         const par = new URLSearchParams(window.location.search).get('UserID');
@@ -22,6 +27,8 @@ const ManageUser = () => {
                 setUser(response.data);
             } catch (err) {
                 setError(err);
+            } finally {
+                setLoading(false);
             }
         };
         fetchUser();
@@ -36,7 +43,8 @@ const ManageUser = () => {
                 setManager(response.data);
             } catch (err) {
                 setError(err);
-                console.log(err);
+            } finally {
+                setIsLoading2(false);
             }
         };
         fetchManager();
@@ -51,7 +59,8 @@ const ManageUser = () => {
                     });
                     setArticles(response.data);
                 } catch (error) {
-                    console.error('Failed to fetch articles:', error);
+                } finally {
+                    setIsLoading(false);
                 }
             }
         };
@@ -68,8 +77,10 @@ const ManageUser = () => {
                     });
                     setComments(response.data);
                 } catch (error) {
-                    console.error('Failed to fetch comments:', error);
+                } finally {
+                    setIsLoading3(false);
                 }
+                    
             }
         };
 
@@ -85,7 +96,8 @@ const ManageUser = () => {
                     });
                     setRatings(response.data);
                 } catch (error) {
-                    console.error('Failed to fetch ratings:', error);
+                } finally {
+                    setIsLoading4(false);
                 }
             }
         };
@@ -97,7 +109,6 @@ const ManageUser = () => {
             await axiosInstance.post('/user/change-role/', { userId: user._id, role: role }, { withCredentials: true });
             setUser({ ...user, role });
         } catch (error) {
-            console.error('Failed to update role:', error);
         }
     };
 
@@ -120,7 +131,6 @@ const ManageUser = () => {
             await axiosInstance.delete(`/article/del/${articleId}`, { withCredentials: true });
             setArticles(articles.filter((article) => article._id !== articleId));
         } catch (error) {
-            console.error('Failed to delete article:', error);
         }
     };
 
@@ -129,7 +139,6 @@ const ManageUser = () => {
             await axiosInstance.delete(`/comment/del/?id=${commentId}`, { withCredentials: true });
             setComments(comments.filter((comment) => comment._id !== commentId));
         } catch (error) {
-            console.error('Failed to delete comment:', error);
         }
     };
 
@@ -138,7 +147,6 @@ const ManageUser = () => {
             await axiosInstance.delete(`/rating/del/${ratingId}`, { withCredentials: true });
             setRatings(ratings.filter((rating) => rating._id !== ratingId));
         } catch (error) {
-            console.error('Failed to delete rating:', error);
         }
     };
 
@@ -147,7 +155,6 @@ const ManageUser = () => {
             await axiosInstance.delete(`/user/del/${user._id}`, { withCredentials: true });
             window.location.href = '/user-managment';
         } catch (error) {
-            console.error('Failed to delete user:', error);
         }
     };
 
@@ -160,8 +167,12 @@ const ManageUser = () => {
         return stars.join(''); // Join stars as a string
     };
 
-    if (loading) {
-        return <div>Loading...</div>;
+    if (loading || isLoading || isLoading2 || isLoading3 || isLoading4) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <img className="loadingImage" src={require('../assets/images/loading.svg').default} alt="Loading" />
+            </div>
+        );
     }
 
     if (error) {
@@ -171,7 +182,7 @@ const ManageUser = () => {
     return (
         <>
             <NavBar user={manager} />
-            <div class="bod">
+            <div className="bod">
             <Container>
                 <h1 className="mt-4">{user.username}</h1>
                 <Button variant="danger" onClick={() => handleDeleteUser()} className="mb-3">

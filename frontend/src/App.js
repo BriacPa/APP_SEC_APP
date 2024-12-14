@@ -5,11 +5,11 @@ import './style/custom.scss'
 
 function App() {
     return (
-        <body className="vh-min-100 vw-min-100">
+        <div className="vh-min-100 vw-min-100">
             <div className="App">
             <AppRoutes />
             </div>
-        </body>
+        </div>
     );
 }
 
