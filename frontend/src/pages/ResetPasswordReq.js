@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axiosInstance from '../utils/axiosInstance';
 import { Container, Form, Button, Alert } from 'react-bootstrap';
 import NavBar from '../components/NavBar';
@@ -8,6 +8,7 @@ function Reset() {
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
+    const [user, setUser] = useState({});
 
     const handleReset = async (e) => {
         e.preventDefault();
@@ -21,7 +22,22 @@ function Reset() {
         }
     };
 
+    const fetchUser = async () => {
+        try {
+            const response = await axiosInstance.get('/user/', { withCredentials: true });
+            setUser(response.data);
+        } catch (error) {
+        }
+    }
+
+    useEffect(() => {
+        fetchUser();
+    }, []);
+
     return (
+        <>
+        <NavBar user={user} />
+        <div className="bod2">
         <Container className="mt-5">
             <div className="d-flex justify-content-center">
                 <Form onSubmit={handleReset} style={{ maxWidth: '400px', width: '100%' }}>
@@ -53,6 +69,8 @@ function Reset() {
                 </Form>
             </div>
         </Container>
+        </div>
+        </>
     );
 }
 

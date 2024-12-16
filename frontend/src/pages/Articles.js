@@ -228,7 +228,7 @@ const Articles = () => {
                                             <Card.Text>
                                                 <strong>Author:</strong> {article.author.username}
                                             </Card.Text>
-                                            <Button variant="primary" href={`/article/?title=${article.title}`}>
+                                            <Button variant="primary" href={`/articles/open/?title=${article.title}`}>
                                                 Read more
                                             </Button>
                                         </Card.Body>

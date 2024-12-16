@@ -33,7 +33,7 @@ function NavigationBar({ user, onLogout }) {
                 <Navbar.Toggle aria-controls="navbar-nav" />
                 <Navbar.Collapse id="navbar-nav">
                     <Nav className="ml-auto">
-                        {["", "#learn-more", "login", "register"].includes(page) ? (
+                        {["", "#learn-more", "login", "register","reset-password"].includes(page) ? (
                             <Nav.Link as={Link} to="/" style={{ color: 'white' }} className="fw-bold">Home</Nav.Link>
                         ) : (
                             <Nav.Link as={Link} to="/" style={{ color: 'white' }}>Home</Nav.Link>
