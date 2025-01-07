@@ -7,7 +7,7 @@ const articleSchema = new mongoose.Schema(
             required: true,
             unique: true,
             minlength: 3,
-            maxlength: 50,
+            maxlength: 120,
         },
         categories: [{
             type: mongoose.Schema.Types.ObjectId,

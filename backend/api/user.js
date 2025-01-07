@@ -6,9 +6,8 @@ const Rates = require('../models/rates');
 const verifyJWT = require('../middleware/verifyJWT');
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
-
-// Ensure environment variables are loaded
 require('dotenv').config();
+
 if (!process.env.JWT_SECRET) {
     console.error('JWT_SECRET is not defined in environment variables');
     process.exit(1);
@@ -16,7 +15,6 @@ if (!process.env.JWT_SECRET) {
 
 const router = express.Router();
 
-// Nodemailer transporter setup
 const transporter = nodemailer.createTransport({
     host: process.env.MAIL_HOST,
     port: process.env.MAIL_PORT,
@@ -27,9 +25,7 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-// Fetch user details
 router.get('/', verifyJWT, async (req, res) => {
-    console.log("/user");
     try {
         const user = await User.findById(req.user.id).select('-password');
         if (!user) return res.status(404).json({ error: 'User not found' });
@@ -39,9 +35,7 @@ router.get('/', verifyJWT, async (req, res) => {
     }
 });
 
-// Change email and send verification email
 router.post('/change-email', verifyJWT, async (req, res) => {
-    console.log("/change-email");
     try {
         const mail = req.body.email.toLowerCase();
         if (!mail) return res.status(400).json({ error: 'Email is required' });
@@ -86,20 +80,50 @@ router.get('/verify-email/:token', async (req, res) => {
 });
 
 const sendVerificationEmail = async (user) => {
-    const token = jwt.sign(
-        { userId: user._id, email: user.email },
-        process.env.JWT_SECRET,
-        { expiresIn: '1h' }
-    );
+    const token = jwt.sign({ userId: user._id }, 'secret-key', { expiresIn: '1h' });
 
-    const verificationUrl = `http://localhost:5000/api/user/verify-email/${token}`;
-    console.log(verificationUrl);
+    const verificationUrl = `http://localhost:3000/verification/${token}`;
+
+    const htmlContent = `
+        <html>
+            <head>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                    .btn-primary { background-color: #00628e; border: 1px solid #00628e; padding: 12px 30px; color: white; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block; }
+                    .btn-primary:hover { background-color: #0056b3; border-color: #0056b3; color: white; }
+                    .card { border-radius: 10px; border: 1px solid #ddd; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+                    .card-header { background-color: #f8f9fa; padding: 15px; text-align: center; font-weight: bold; border-top-left-radius: 10px; border-top-right-radius: 10px; }
+                    .card-body { padding: 20px; }
+                    .footer { font-size: 12px; text-align: center; padding: 20px; color: #777; }
+                    .confirmation-line { margin: 20px 0; border-top: 2px solid #ddd; }
+                </style>
+            </head>
+            <body style="background-color: #f4f4f4; padding: 30px;">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">Email Confirmation</div>
+                        <div class="card-body">
+                            <p>Dear ${user.username},</p>
+                            <p>Please click the link below to verify your email address:</p>
+                            <div class="confirmation-line"></div>
+                            <p><a href="${verificationUrl}" class="btn-primary">Verify Email</a></p>
+                            <p>If you were not at the origin of this request, please ignore this email.</p>
+                        </div>
+                    </div>
+                    <div class="footer">
+                        <p>Best regards,<br/>Your App Team</p>
+                    </div>
+                </div>
+            </body>
+        </html>
+    `;
 
     const mailOptions = {
         from: process.env.MAIL_USER,
         to: user.email,
         subject: 'Email Verification',
-        text: `Click the following link to verify your email: ${verificationUrl}`,
+        html: htmlContent,
     };
 
     try {
@@ -110,9 +134,7 @@ const sendVerificationEmail = async (user) => {
     }
 };
 
-// Change password
 router.post('/change-password', verifyJWT, async (req, res) => {
-    console.log("/change-password");
     try {
         const { password, confirmPassword } = req.body;
         if (!password || !confirmPassword) return res.status(400).json({ error: 'Password and confirm password are required' });
@@ -130,9 +152,7 @@ router.post('/change-password', verifyJWT, async (req, res) => {
     }
 });
 
-// Request account deletion
 router.post('/delete-account-req', verifyJWT, async (req, res) => {
-    console.log("/delete-account-req");
     try {
         const user = await User.findById(req.user.id);
         if (!user) return res.status(404).json({ error: 'User not found' });
@@ -146,71 +166,93 @@ router.post('/delete-account-req', verifyJWT, async (req, res) => {
 });
 
 const sendDeleteAccountEmail = async (user) => {
-    const token = jwt.sign(
-        { userId: user._id },
-        process.env.JWT_SECRET,
-        { expiresIn: '1h' }
-    );
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    const deleteAccountUrl = `http://localhost:5000/api/user/delete-account/${token}`;
-    console.log(deleteAccountUrl);
+    const deleteAccountUrl = `http://localhost:3000/verification-del/${token}`;
+
+    const htmlContent = `
+        <html>
+            <head>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                    .btn-primary { background-color: #e41515; border: 1px solid #e41515; padding: 12px 30px; color: white; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block; }
+                    .btn-primary:hover { background-color: #e41515; border-color: white; color: white; }
+                    .card { border-radius: 10px; border: 1px solid #ddd; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+                    .card-header { background-color: #f8f9fa; padding: 15px; text-align: center; font-weight: bold; border-top-left-radius: 10px; border-top-right-radius: 10px; }
+                    .card-body { padding: 20px; }
+                    .footer { font-size: 12px; text-align: center; padding: 20px; color: #777; }
+                    .confirmation-line { margin: 20px 0; border-top: 2px solid #ddd; }
+                </style>
+            </head>
+            <body style="background-color: #f4f4f4; padding: 30px;">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">Account Deletion</div>
+                        <div class="card-body">
+                            <p>Dear ${user.username},</p>
+                            <p>We are sorry to hear you wish to leave us. Please click on the link below to delete your account:</p>
+                            <div class="confirmation-line"></div>
+                            <p><a href="${deleteAccountUrl}" class="btn-primary">Delete</a></p>
+                            <p>If you were not at the origin of this request, please ignore this email.</p>
+                        </div>
+                    </div>
+                    <div class="footer">
+                        <p>Best regards,<br/>Your App Team</p>
+                    </div>
+                </div>
+            </body>
+        </html>
+    `;
 
     const mailOptions = {
         from: process.env.MAIL_USER,
         to: user.email,
         subject: 'Account Deletion',
-        text: `Click the following link to delete your account: ${deleteAccountUrl}`,
+        html: htmlContent,
     };
 
     try {
         await transporter.sendMail(mailOptions);
-        console.log(`Delete account email sent to ${user.email}`);
+        console.log(`Deletion email sent to ${user.email}`);
     } catch (error) {
         console.error('Error sending email:', error);
     }
 };
 
 router.delete('/del/:id', verifyJWT, async (req, res) => {
-    console.log('/del/(user)');
     const { id } = req.params;
     const user = await User.findById(req.user.id);
     const role = user.role;
-    const userID = req.user.id;
     try {
         const userToDelete = await User.findById(id);
         if (!userToDelete) return res.status(404).json({ message: 'User not found' });
         if (!(role === 'admin' || (role === 'moderator' && (userToDelete.role === 'author' || userToDelete.role === 'user')))) return res.status(403).json({ message: 'You do not have permission to delete this user' });
         await userToDelete.deleteOne();
-        if (Comment.find({author: id})) {
+        if (Comment.find({ author: id })) {
             await Comment.updateMany({ author: id }, { $unset: { author: "" } });
         }
-        if (Article.find({author: id})) {
+        if (Article.find({ author: id })) {
             const articles = await Article.find({ author: id });
             for (const article of articles) {
-            await Comment.deleteMany({ article: article._id });
+                await Comment.deleteMany({ article: article._id });
             }
             await Article.deleteMany({ author: id });
         }
-        if (Rates.find({author: id})) {
+        if (Rates.find({ author: id })) {
             const ratedArticles = await Rates.distinct('article', { author: id });
             await Rates.deleteMany({ author: id });
-            console.log(ratedArticles);
             for (const articleId of ratedArticles) {
                 await updateArticleRate(articleId);
             }
-
         }
         res.status(200).json({ message: 'User successfully deleted' });
     } catch (error) {
-        console.error('Error deleting user:', error);
-        res.status(500).json({ message: 'Failed to delete user' });    
+        res.status(500).json({ message: 'Failed to delete user' });
     }
 });
 
-
-// Handle account deletion
 router.get('/delete-account/:token', async (req, res) => {
-    console.log("/delete-account");
     const { token } = req.params;
 
     try {
@@ -221,35 +263,31 @@ router.get('/delete-account/:token', async (req, res) => {
         if (!user) return res.status(404).json({ message: 'User not found' });
 
         await user.deleteOne();
-        if (Comment.find({author: userId})) {
+        if (Comment.find({ author: userId })) {
             await Comment.updateMany({ author: userId }, { $unset: { author: "" } });
         }
-        if (Article.find({author: userId})) {
+        if (Article.find({ author: userId })) {
             const articles = await Article.find({ author: userId });
             for (const article of articles) {
-            await Comment.deleteMany({ article: article._id });
+                await Comment.deleteMany({ article: article._id });
             }
             await Article.deleteMany({ author: userId });
         }
-        if (Rates.find({author: userId})) {
+        if (Rates.find({ author: userId })) {
             const ratedArticles = await Rates.distinct('article', { author: userId });
             await Rates.deleteMany({ author: userId });
-            console.log(ratedArticles);
             for (const articleId of ratedArticles) {
                 await updateArticleRate(articleId);
             }
-
         }
 
         res.status(200).json({ message: 'Account successfully deleted.' });
     } catch (error) {
         res.status(400).json({ message: 'Invalid or expired token' });
-        console.error('Error deleting account:', error);
     }
 });
 
 const updateArticleRate = async (articleId) => {
-    console.log("...updateArticleRate");
     const article = await Article.findById(articleId);
     if (!article) return;
     const rates = await Rates.find({ article: articleId });
@@ -260,20 +298,14 @@ const updateArticleRate = async (articleId) => {
     }
     if (totalRate === 0) {
         article.rating = 0;
-        await article.save();
-        console.log(`Article ${articleId} rate updated to 0`);
-    }
-    else{
+    } else {
         const avgRate = totalRate / rates.length;
         article.rating = Math.round(avgRate);
-        await article.save();
-        console.log(`Article ${articleId} rate updated to ${avgRate}`);
     }
-
-}
+    await article.save();
+};
 
 router.get('/comments', verifyJWT, async (req, res) => {
-    console.log("/comments");
     try {
         const comments = await Comment.find({ author: req.user.id }).populate('article', 'title');
         res.json(comments);
@@ -283,9 +315,8 @@ router.get('/comments', verifyJWT, async (req, res) => {
 });
 
 router.get('/all-users', verifyJWT, async (req, res) => {
-    console.log("/all-users");
     const user = await User.findById(req.user.id);
-    const role = user.role; 
+    const role = user.role;
     if (role !== 'admin' && role !== 'moderator') return res.status(403).json({ error: 'Unauthorized' });
     try {
         const users = await User.find().select('-password');
@@ -296,24 +327,21 @@ router.get('/all-users', verifyJWT, async (req, res) => {
 });
 
 router.get('/specific-user', verifyJWT, async (req, res) => {
-    console.log("/specific-user");
-    const { userId } = req.query
+    const { userId } = req.query;
     try {
-    if (!userId) return res.status(400).json({ error: 'User ID is required' });
-    const manager = await User.findById(req.user.id);
-    if (!manager) return res.status(404).json({ error: 'Manager not found' });
-    const user = await User.findById(userId).select('-password');
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    if (!(manager.role === 'admin' || (manager.role === 'moderator' && (user.role === 'user' || user.role === 'author')))) return res.status(403).json({ error: 'Unauthorized' });
-    res.json(user);
+        if (!userId) return res.status(400).json({ error: 'User ID is required' });
+        const manager = await User.findById(req.user.id);
+        if (!manager) return res.status(404).json({ error: 'Manager not found' });
+        const user = await User.findById(userId).select('-password');
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        if (!(manager.role === 'admin' || (manager.role === 'moderator' && (user.role === 'user' || user.role === 'author')))) return res.status(403).json({ error: 'Unauthorized' });
+        res.json(user);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch user' });
     }
-}
-);
+});
 
 router.post('/change-role', verifyJWT, async (req, res) => {
-    console.log("/change-role");
     const { userId, role } = req.body;
     if (!userId || !role) return res.status(400).json({ error: 'User ID and role are required' });
     try {
@@ -328,8 +356,6 @@ router.post('/change-role', verifyJWT, async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'Failed to update user role' });
     }
-}
-);
-    
+});
 
 module.exports = router;

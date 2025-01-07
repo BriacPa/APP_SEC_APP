@@ -15,7 +15,9 @@ import ChangeMail from '../pages/ChangeMail';
 import UserManagment from '../pages/UserManagment';
 import ManageUser from '../pages/ManageUser';
 import Categories from '../pages/Categories';
-
+import Home from '../pages/Home';
+import Verification from '../pages/Verification';
+import VerificationDel from '../pages/VerificationDel';
 
 const App = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -31,12 +33,10 @@ const App = () => {
                 setIsAuthenticated(response.data.isAuthenticated || false);
                 setRole(user.data.role || null); // Set role from response
             } catch (error) {
-                // Suppress 403 errors without logging them to the console
                 if (error.response?.status === 403) {
                     setIsAuthenticated(false);
                     setRole(null);
                 } else {
-                    console.error('Error during authentication check:', error);
                 }
             } finally {
                 setLoading(false); // Set loading to false after authentication check
@@ -48,19 +48,26 @@ const App = () => {
 
     if (loading) {
         // Return loading state while authentication check is in progress
-        return <div>Loading...</div>;
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+            <img className="loadingImage" src={require('../assets/images/loading.svg').default} alt="Loading" />
+            </div>
+        );
     }
 
     return (
         <Router>
             <Routes>
                 {/* Public Routes */}
+                <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/reset-password" element={<ResetPasswordReq />} />
                 <Route path="/reset-password-active" element={<ResetPasswordRes />} />
                 <Route path="/articles" element={<Articles />} />
-                <Route path="/article" element={<Article />} />
+                <Route path="/articles/open" element={<Article />} />
+                <Route path="/verification/:token" element={<Verification />} />
+                <Route path="/verification-del/:token" element={<VerificationDel />} />
 
                 {/* Protected Routes */}
                 <Route 
@@ -82,7 +89,7 @@ const App = () => {
                     } 
                 />
                 <Route
-                    path="/changeMail"
+                    path="/dashboard/changeMail"
                     element={
                         <ProtectedRoute isAuthenticated={isAuthenticated} 
                         requiredRole={['user','author','moderator','admin']} 
@@ -92,7 +99,7 @@ const App = () => {
                     }
                 />
                 <Route
-                    path="/reset-password-logged"
+                    path="/dashboard/reset-password-logged"
                     element={
                         <ProtectedRoute isAuthenticated={isAuthenticated} 
                         requiredRole={['user','author','moderator','admin']} 
@@ -112,7 +119,7 @@ const App = () => {
                     }
                 />
                 <Route
-                    path="/manage-user"
+                    path="/user-managment/manage-user"
                     element={
                         <ProtectedRoute isAuthenticated={isAuthenticated} 
                         requiredRole={['admin','moderator']} 

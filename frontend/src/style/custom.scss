@@ -1,0 +1,7 @@
+// custom.scss
+// Override the primary color before importing Bootstrap
+$primary: #00618E; // Your custom color here
+$bg-dark: #00618E; // Your custom color here
+
+@import 'node_modules/bootstrap/scss/bootstrap'; // Import Bootstrap SCSS
+

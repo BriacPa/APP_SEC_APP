@@ -27,7 +27,6 @@ router.delete('/del/:id', verifyJWT, async (req, res) => {
 });
 
 router.get('/', verifyJWT, async (req, res) => {
-    console.log('/rating');
     try {
         const ratings = await Rates.find({ author: req.user.id }).populate('article', 'title');
         res.json(ratings);

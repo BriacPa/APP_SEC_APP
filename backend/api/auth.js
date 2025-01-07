@@ -6,29 +6,110 @@ const router = express.Router();
 const verifyJWT = require('../middleware/verifyJWT');
 require('dotenv').config();
 
-// Create a transporter object using Zoho's SMTP transport
 const transporter = nodemailer.createTransport({
-    host: process.env.MAIL_HOST, // smtp.zoho.eu
-    port: process.env.MAIL_PORT, // 465
-    secure: true, // true for 465 port (SSL)
+    host: process.env.MAIL_HOST,
+    port: process.env.MAIL_PORT,
+    secure: true,
     auth: {
-        user: process.env.MAIL_USER, // your Zoho email address
-        pass: process.env.MAIL_PASS, // your Zoho app-specific password
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS,
     }
 });
 
-// Send verification email after registration
 const sendVerificationEmail = async (user) => {
     const token = jwt.sign({ userId: user._id }, 'secret-key', { expiresIn: '1h' });
 
-    const verificationUrl = `http://localhost:5000/api/auth/verify-email/${token}`;
-    console.log(verificationUrl);
+    const verificationUrl = `http://localhost:3000/verification/${token}`;
+
+    const htmlContent = `
+        <html>
+            <head>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .container {
+                        max-width: 600px;
+                        margin: 0 auto;
+                        padding: 20px;
+                    }
+                    .btn-primary {
+                        background-color: #00628e;
+                        border: 1px solid #00628e;
+                        padding: 12px 30px;
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 5px;
+                        font-size: 16px;
+                        display: inline-block;
+                    }
+                    .btn-primary:hover {
+                        background-color: #0056b3;
+                        border-color: #0056b3;
+                        color: white;
+                    }
+                    .card {
+                        border-radius: 10px;
+                        border: 1px solid #ddd;
+                        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                    }
+                    .card-header {
+                        background-color: #f8f9fa;
+                        padding: 15px;
+                        text-align: center;
+                        font-weight: bold;
+                        border-top-left-radius: 10px;
+                        border-top-right-radius: 10px;
+                    }
+                    .card-body {
+                        padding: 20px;
+                    }
+                    .footer {
+                        font-size: 12px;
+                        text-align: center;
+                        padding: 20px;
+                        color: #777;
+                    }
+                    .confirmation-line {
+                        margin: 20px 0;
+                        border-top: 2px solid #ddd;
+                    }
+                </style>
+            </head>
+            <body style="background-color: #f4f4f4; padding: 30px;">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">
+                            Email Confirmation
+                        </div>
+                        <div class="card-body">
+                            <p>Dear ${user.username},</p>
+                            <p>Please click the link below to verify your email address:</p>
+                            
+                            <div class="confirmation-line"></div>
+                            
+                            <p>
+                                <a href="${verificationUrl}" class="btn-primary">Verify Email</a>
+                            </p>
+                            
+                            <p>If you were not at the orgin of this request, please ignore this email.</p>
+                        </div>
+                    </div>
+                    <div class="footer">
+                        <p>Best regards,<br/>Your App Team</p>
+                    </div>
+                </div>
+            </body>
+        </html>
+    `;
 
     const mailOptions = {
-        from: process.env.MAIL_USER,  // Zoho email address
+        from: process.env.MAIL_USER,
         to: user.email,
         subject: 'Email Verification',
-        text: `Click the following link to verify your email: ${verificationUrl}`,
+        html: htmlContent,
     };
 
     try {
@@ -39,7 +120,6 @@ const sendVerificationEmail = async (user) => {
     }
 };
 
-// Register endpoint
 router.post('/register', async (req, res) => {
     console.log("/register");
     try {
@@ -48,15 +128,13 @@ router.post('/register', async (req, res) => {
         const user = new User({ username, email, password });
         if (password !== confirmPassword) return res.status(400).send('Passwords do not match');
         await user.save();
-        await sendVerificationEmail(user); // Send email after user is saved
+        await sendVerificationEmail(user);
         res.status(201).send('User registered successfully!');
     } catch (error) {
         res.status(400).json({ error: error.message });
-        
     }
 });
 
-// Email verification endpoint
 router.get('/verify-email/:token', async (req, res) => {
     const { token } = req.params;
 
@@ -68,7 +146,6 @@ router.get('/verify-email/:token', async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Mark email as verified
         user.isEmailVerified = true;
         await user.save();
 
@@ -78,8 +155,6 @@ router.get('/verify-email/:token', async (req, res) => {
     }
 });
 
-
-// Login
 router.post('/login', async (req, res) => {
     console.log("/login");
     try {
@@ -91,10 +166,10 @@ router.post('/login', async (req, res) => {
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.cookie('token', token, {
-            httpOnly: true, // Prevents client-side JS from accessing the cookie
-            secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-            sameSite: 'strict', // Helps prevent CSRF attacks
-            maxAge: 3600000, // 1 hour
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 3600000,
         });
         res.json('Login successful!');
     } catch (error) {
@@ -102,7 +177,6 @@ router.post('/login', async (req, res) => {
     }
 });
 
-//logout
 router.post('/logout', (req, res) => {
     console.log("/logout");
     try {
@@ -117,7 +191,6 @@ router.post('/logout', (req, res) => {
     }
 });
 
-//fetch user
 router.get('/user', verifyJWT, async (req, res) => {
     console.log("/user");
     try {
@@ -129,7 +202,6 @@ router.get('/user', verifyJWT, async (req, res) => {
     }
 });
 
-// Route to check if the user is authenticated
 router.get('/isAuthenticated', verifyJWT, (req, res) => {
     console.log("/isAuthenticated");
     try {

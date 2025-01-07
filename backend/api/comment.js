@@ -5,23 +5,19 @@ const router = Router();
 const verifyJWT = require('../middleware/verifyJWT');
 
 router.delete('/del', verifyJWT, async (req, res) => {
-    try {
-        console.log('/comment(delete)');
-        
-        const { id } = req.query; // Extract comment ID from route parameter
-        const userID = req.user.id; // User ID from verified JWT
-        const user = await User.findById(userID); // Fetch user details
+    try {        
+        const { id } = req.query;
+        const userID = req.user.id;
+        const user = await User.findById(userID);
         if (!user) return res.status(404).json({ message: 'User not found' });
-        const role = user.role; // User role
-        const comment = await Comment.findById(id); // Fetch comment by ID
+        const role = user.role;
+        const comment = await Comment.findById(id);
         if (!comment) return res.status(404).json({ message: 'Comment not found' });
 
-        // Check permissions
         if (role !== 'admin' && role !== 'moderator' && userID !== String(comment.author)) {
             return res.status(403).json({ message: 'You do not have permission to delete this comment' });
         }
 
-        // Delete comment
         await comment.deleteOne();
         res.status(200).json({ message: 'Comment successfully deleted' });
     } catch (error) {
@@ -31,19 +27,13 @@ router.delete('/del', verifyJWT, async (req, res) => {
 });
 
 router.get('/CommentsAuthorQW', verifyJWT, async (req, res) => {
-    try{
-        console.log('/CommentsAuthorQW');
+    try {
         const userId = req.query.id;
-        const comments = await Comment.find({ author: userId}).populate('article', 'title');
+        const comments = await Comment.find({ author: userId }).populate('article', 'title');
         res.json(comments);
-    }
-    catch(error){
+    } catch (error) {
         res.status(500).json({ error: error.message });
     }
-}
-);
-
-
-
+});
 
 module.exports = router;
