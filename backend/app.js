@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const cors = require('cors');
+// const cors = require('cors');
 const bodyParser = require('body-parser');
 const authRoutes = require('./api/auth');
 const userRoutes = require('./api/user');
@@ -19,14 +19,14 @@ const app = express();
 // Add cookie-parser middleware
 app.use(cookieParser());
 
-const corsOptions = {
-    origin: 'https://app-sec-app-client.vercel.app', // Replace with your frontend's URL
-    
-    credentials: true, // Allow credentials (cookies, authorization headers, etc.)
-};
+// const corsOptions = {
+//     origin: 'https://app-sec-app-client.vercel.app', // Replace with your frontend's URL
+
+//     credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+// };
 
 // Middleware
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
 // Routes
