@@ -19,7 +19,7 @@ const transporter = nodemailer.createTransport({
 const sendVerificationEmail = async (user) => {
     const token = jwt.sign({ userId: user._id }, 'secret-key', { expiresIn: '1h' });
 
-    const verificationUrl = `http://localhost:3000/verification/${token}`;
+    const verificationUrl = `https://app-sec-app-server-18blk3li4-briacs-projects-8dadbe9b.vercel.app/verification/${token}`;
 
     const htmlContent = `
         <html>
