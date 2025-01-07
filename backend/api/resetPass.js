@@ -8,7 +8,6 @@ require('dotenv').config();
 const router = express.Router();
 
 router.post('/', async (req, res) => {
-    console.log("/resetPass");
     try {
         const email = req.body.email.toLowerCase();
         const user = await User.findOne({ email });
@@ -140,7 +139,6 @@ const sendResetPassword = async (user) => {
 };
 
 router.post('/RP', async (req, res) => {
-    console.log("/resetPass/RP");
     const {token, password, confirmPassword, code } = req.body;
 
     try {

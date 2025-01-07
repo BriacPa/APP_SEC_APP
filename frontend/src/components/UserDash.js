@@ -23,7 +23,6 @@ const UserDash = ({ user, setUser, setError }) => {
             await axiosInstance.post('/auth/logout', {}, {
                 withCredentials: true,
             });
-            setUser(null);
             navigate('/login');
         } catch (err) {
             console.error('Error during account deletion:', err);

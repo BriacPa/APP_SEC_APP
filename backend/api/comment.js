@@ -5,9 +5,7 @@ const router = Router();
 const verifyJWT = require('../middleware/verifyJWT');
 
 router.delete('/del', verifyJWT, async (req, res) => {
-    try {
-        console.log('/comment(delete)');
-        
+    try {        
         const { id } = req.query;
         const userID = req.user.id;
         const user = await User.findById(userID);
@@ -30,7 +28,6 @@ router.delete('/del', verifyJWT, async (req, res) => {
 
 router.get('/CommentsAuthorQW', verifyJWT, async (req, res) => {
     try {
-        console.log('/CommentsAuthorQW');
         const userId = req.query.id;
         const comments = await Comment.find({ author: userId }).populate('article', 'title');
         res.json(comments);
