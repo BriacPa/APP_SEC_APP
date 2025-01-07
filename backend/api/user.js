@@ -82,7 +82,7 @@ router.get('/verify-email/:token', async (req, res) => {
 const sendVerificationEmail = async (user) => {
     const token = jwt.sign({ userId: user._id }, 'secret-key', { expiresIn: '1h' });
 
-    const verificationUrl = `http://localhost:3000/verification/${token}`;
+    const verificationUrl = `https://app-sec-app-server-18blk3li4-briacs-projects-8dadbe9b.vercel.app/verification/${token}`;
 
     const htmlContent = `
         <html>
@@ -168,7 +168,7 @@ router.post('/delete-account-req', verifyJWT, async (req, res) => {
 const sendDeleteAccountEmail = async (user) => {
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    const deleteAccountUrl = `http://localhost:3000/verification-del/${token}`;
+    const deleteAccountUrl = `https://app-sec-app-server-18blk3li4-briacs-projects-8dadbe9b.vercel.app/verification-del/${token}`;
 
     const htmlContent = `
         <html>

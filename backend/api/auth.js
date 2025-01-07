@@ -19,7 +19,7 @@ const transporter = nodemailer.createTransport({
 const sendVerificationEmail = async (user) => {
     const token = jwt.sign({ userId: user._id }, 'secret-key', { expiresIn: '1h' });
 
-    const verificationUrl = `http://localhost:3000/verification/${token}`;
+    const verificationUrl = `https://app-sec-app-server-18blk3li4-briacs-projects-8dadbe9b.vercel.app/verification/${token}`;
 
     const htmlContent = `
         <html>
@@ -167,8 +167,7 @@ router.post('/login', async (req, res) => {
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.cookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'none',
             maxAge: 3600000,
         });
         res.json('Login successful!');
@@ -182,7 +181,6 @@ router.post('/logout', (req, res) => {
     try {
         res.clearCookie('token', {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
         });
         res.json({ message: 'Logged out successfully' });

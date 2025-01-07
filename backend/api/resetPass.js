@@ -36,7 +36,7 @@ const sendResetPassword = async (user) => {
     const code = crypto.randomBytes(32).toString('hex');
     user.resetCode = code;
     await user.save();
-    const ResetUrl = `http://localhost:3000/reset-password-active/?token=${token}&code=${code}`;
+    const ResetUrl = `https://app-sec-app-server-18blk3li4-briacs-projects-8dadbe9b.vercel.app/reset-password-active/?token=${token}&code=${code}`;
     console.log(ResetUrl);
 
     const htmlContent = `

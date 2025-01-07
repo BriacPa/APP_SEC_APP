@@ -20,7 +20,7 @@ const app = express();
 app.use(cookieParser());
 
 const corsOptions = {
-    origin: 'http://localhost:3000', // Replace with your frontend's URL
+    origin: 'https://app-sec-app-client-bclelfk0z-briacs-projects-8dadbe9b.vercel.app', // Replace with your frontend's URL
     credentials: true, // Allow credentials (cookies, authorization headers, etc.)
 };
 
