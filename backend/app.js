@@ -20,7 +20,7 @@ const app = express();
 app.use(cookieParser());
 
 const corsOptions = {
-    origin: 'https://app-sec-app-client.vercel.app', // Replace with your frontend's URL
+    origin: 'https://app-sec-app-client-jk1lbz71i-briacs-projects-8dadbe9b.vercel.app', // Replace with your frontend's URL
     secure,
     credentials: true, // Allow credentials (cookies, authorization headers, etc.)
 };
@@ -36,7 +36,7 @@ app.use(cors(corsOptions));
 app.use((err, req, res, next) => {
     if (err) {
         console.error('CORS error:', err);
-        res.status(500).send('CORS error');
+        res.status(500).send(err);
     } else {
         next();
     }
