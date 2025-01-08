@@ -26,7 +26,22 @@ const corsOptions = {
 };
 
 // Middleware
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+});
+
 app.use(cors(corsOptions));
+
+app.use((err, req, res, next) => {
+    if (err) {
+        console.error('CORS error:', err);
+        res.status(500).send('CORS error');
+    } else {
+        next();
+    }
+});
+
 app.use(bodyParser.json());
 
 // Routes
