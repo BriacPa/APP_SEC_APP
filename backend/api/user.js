@@ -23,6 +23,7 @@ const transporter = nodemailer.createTransport({
         user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASS,
     },
+    dnsTimeout: 10000,
 });
 
 router.get('/', verifyJWT, async (req, res) => {
