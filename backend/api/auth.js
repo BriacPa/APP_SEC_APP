@@ -6,25 +6,24 @@ const router = express.Router();
 const verifyJWT = require('../middleware/verifyJWT');
 require('dotenv').config();
 
-// Define the secure flag based on environment (use true for production, false for local development)
-const secure = process.env.NODE_ENV === 'production';
+// Define the secure flag based on the environment
+const secure = process.env.NODE_ENV === 'production'; // Ensures secure cookies are used in production
 
-// Nodemailer transporter configuration
 const transporter = nodemailer.createTransport({
     host: process.env.MAIL_HOST,
     port: process.env.MAIL_PORT,
-    secure: true,  // true for production, false for development
+    secure: true, // Use true for production, false for development if using plain HTTP
     auth: {
         user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASS,
     }
 });
 
-// Function to send verification email to the user
+// Send the verification email
 const sendVerificationEmail = async (user) => {
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });  // Use env variable for JWT secret
+    const token = jwt.sign({ userId: user._id }, 'secret-key', { expiresIn: '1h' });
 
-    const verificationUrl = `${process.env.FRONTEND_URL}/verification/${token}`;  // Use FRONTEND_URL from environment variables for dynamic URL
+    const verificationUrl = `https://app-sec-app-server-18blk3li4-briacs-projects-8dadbe9b.vercel.app/verification/${token}`;
 
     const htmlContent = `
         <html>
@@ -125,14 +124,14 @@ const sendVerificationEmail = async (user) => {
     }
 };
 
-// Register route - creates user and sends verification email
+// Register a new user and send the verification email
 router.post('/register', async (req, res) => {
     console.log("/register");
     try {
         let { username, email, password, confirmPassword } = req.body;
         email = email.toLowerCase();
-        if (password !== confirmPassword) return res.status(400).send('Passwords do not match');
         const user = new User({ username, email, password });
+        if (password !== confirmPassword) return res.status(400).send('Passwords do not match');
         await user.save();
         await sendVerificationEmail(user);
         res.status(201).send('User registered successfully!');
@@ -141,12 +140,12 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Verify email route - checks token and verifies email
+// Verify email address using the token
 router.get('/verify-email/:token', async (req, res) => {
     const { token } = req.params;
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);  // Use JWT_SECRET from env
+        const decoded = jwt.verify(token, 'secret-key');
         const user = await User.findById(decoded.userId);
 
         if (!user) {
@@ -162,7 +161,7 @@ router.get('/verify-email/:token', async (req, res) => {
     }
 });
 
-// Login route - generates and sends JWT token
+// Login and set a secure, HTTP-only cookie
 router.post('/login', async (req, res) => {
     console.log("/login");
     try {
@@ -175,25 +174,28 @@ router.post('/login', async (req, res) => {
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
         res.cookie('token', token, {
-            httpOnly: true,
-            secure,  // Use secure flag based on the environment
-            sameSite: 'None',  // Required for cross-origin requests
-            maxAge: 3600000,  // 1 hour expiration
+            httpOnly: true,         // Prevent JavaScript access to the cookie
+            secure,                 // Set the cookie as secure (only over HTTPS)
+            sameSite: 'None',       // Allow cross-origin requests
+            maxAge: 3600000,        // Cookie expires in 1 hour
+            partitioned: true,      // Partition the cookie (reduces tracking)
         });
+
         res.json('Login successful!');
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 });
 
-// Logout route - clears the cookie
+// Logout and clear the token cookie
 router.post('/logout', (req, res) => {
     console.log("/logout");
     try {
         res.clearCookie('token', {
             httpOnly: true,
-            secure,  // Use secure flag based on the environment
-            sameSite: 'None',  // Required for cross-origin requests
+            secure,                // Clear the cookie securely (only over HTTPS)
+            sameSite: 'None',      // Allow cross-origin requests
+            partitioned: true,     // Partition the cookie for privacy
         });
         res.json({ message: 'Logged out successfully' });
     } catch (error) {
@@ -201,7 +203,7 @@ router.post('/logout', (req, res) => {
     }
 });
 
-// Get current user route - retrieves the user from the token
+// Fetch the authenticated user
 router.get('/user', verifyJWT, async (req, res) => {
     console.log("/user");
     try {
@@ -213,13 +215,17 @@ router.get('/user', verifyJWT, async (req, res) => {
     }
 });
 
-// Check if user is authenticated
+// Check if the user is authenticated
 router.get('/isAuthenticated', verifyJWT, (req, res) => {
     console.log("/isAuthenticated");
     try {
-        res.json({ isAuthenticated: true });
+        res.json({
+            isAuthenticated: true,
+        });
     } catch (error) {
-        res.json({ isAuthenticated: false });
+        res.json({
+            isAuthenticated: false,
+        });
     }
 });
 
