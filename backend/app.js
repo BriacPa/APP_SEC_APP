@@ -19,9 +19,9 @@ const app = express();
 // Add cookie-parser middleware
 app.use(cookieParser());
 
+
 const corsOptions = {
     origin: 'https://app-sec-app-client-jk1lbz71i-briacs-projects-8dadbe9b.vercel.app', // Replace with your frontend's URL
-    secure,
     credentials: true, // Allow credentials (cookies, authorization headers, etc.)
 };
 
