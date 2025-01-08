@@ -2,7 +2,7 @@ const Rates = require('../models/rates');
 const router = require('express').Router();
 const verifyJWT = require('../middleware/verifyJWT');
 const Article = require('../models/article');
-const User = require('../models/user');
+const User = require('../models/User');
 
 router.delete('/del/:id', verifyJWT, async (req, res) => {
     console.log('/rating/:id-(delete)');

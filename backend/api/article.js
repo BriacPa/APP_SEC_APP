@@ -1,5 +1,5 @@
 const express = require('express');
-const User = require('../models/user');
+const User = require('../models/User');
 const Article = require('../models/article');
 const Comment = require('../models/comment');
 const Rates = require('../models/rates');

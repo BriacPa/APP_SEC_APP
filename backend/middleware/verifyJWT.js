@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/user');
+const User = require('../models/User');
 
 const verifyJWT = (req, res, next) => {
     const token = req.cookies.token || req.headers.authorization?.split(' ')[1]; // You can check both cookies and authorization header

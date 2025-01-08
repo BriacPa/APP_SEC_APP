@@ -1,5 +1,5 @@
 const Comment = require('../models/comment');
-const User = require('../models/user');
+const User = require('../models/User');
 const { Router } = require('express');
 const router = Router();
 const verifyJWT = require('../middleware/verifyJWT');

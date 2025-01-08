@@ -1,6 +1,6 @@
 const Categorie = require('../models/categorie');
 const Article = require('../models/article');
-const User = require('../models/user');
+const User = require('../models/User');
 const VerifyJWT = require('../middleware/verifyJWT');
 
 const router = require('express').Router();
