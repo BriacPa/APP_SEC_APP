@@ -24,10 +24,8 @@ app.use(cookieParser()); // No need for COOKIE_SECRET if not signing cookies
 
 // CORS configuration
 const corsOptions = {
-    origin: 'https://app-sec-app-client-jk1lbz71i-briacs-projects-8dadbe9b.vercel.app', // Replace with your frontend's URL
+    origin: '*', // Replace with your frontend's URL
     credentials: true, // Allow cookies and credentials to be sent with requests
-    allowedHeaders: 'Content-Type,Authorization', // Allow necessary headers like Authorization
-    methods: 'GET,POST,PUT,PATCH,DELETE,OPTIONS', // Allow specific methods
 };
 
 // CORS middleware to handle requests and preflight
