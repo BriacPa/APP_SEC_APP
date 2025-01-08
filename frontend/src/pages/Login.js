@@ -20,8 +20,9 @@ function Login() {
             const response = await axiosInstance.get('/user', { withCredentials: true });
             setUser(response.data);
             setIsLogged(true);
-        } catch {
+        } catch(err) {
             setIsLogged(false);
+            console.log(err)
         } finally {
             setIsLoading(false);
         }
