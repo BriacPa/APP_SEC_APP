@@ -16,7 +16,8 @@ const transporter = nodemailer.createTransport({
     auth: {
         user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASS,
-    }
+    },
+    connectionTimeout: 10000,
 });
 
 // Send the verification email
