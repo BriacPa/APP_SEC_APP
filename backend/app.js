@@ -17,8 +17,6 @@ dotenv.config();
 const app = express();
 
 // Define 'secure' for cookies based on the environment
-const secure = process.env.NODE_ENV === 'production'; // Cookies should be secure in production
-
 // Use cookie-parser middleware to parse cookies (no secret)
 app.use(cookieParser()); // No need for COOKIE_SECRET if not signing cookies
 
