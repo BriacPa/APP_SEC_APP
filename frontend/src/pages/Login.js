@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axiosInstance from '../utils/axiosInstance';
 import { Button, Alert, Container, Row, Col, Form } from 'react-bootstrap';
 import NavBar from '../components/NavBar';
+import { useNavigate } from 'react-router-dom';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_REGEX = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
@@ -14,15 +15,16 @@ function Login() {
     const [errorMessage, setErrorMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [user, setUser] = useState({});
+    const navigate = useNavigate();
 
     const fetchUser = async () => {
         try {
             const response = await axiosInstance.get('/user', { withCredentials: true });
             setUser(response.data);
             setIsLogged(true);
-        } catch(err) {
+        } catch (err) {
             setIsLogged(false);
-            console.log(err)
+            console.error('Error fetching user:', err);
         } finally {
             setIsLoading(false);
         }
@@ -31,6 +33,7 @@ function Login() {
     const handleLogin = async (e) => {
         e.preventDefault();
         setErrorMessage('');
+        
         if (!EMAIL_REGEX.test(email)) {
             setErrorMessage('Invalid email format');
             return;
@@ -39,24 +42,30 @@ function Login() {
             setErrorMessage('Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, and one number');
             return;
         }
+
         setIsSubmitting(true);
         try {
             await axiosInstance.post('/auth/login', { email, password });
-            fetchUser();
+            fetchUser(); // This updates the user state after login
         } catch (err) {
-            setErrorMessage(err.response?.data || 'Error during login');
+            console.log('Login error:', err);
+            setErrorMessage(err.response?.data?.message || 'Error during login');
         } finally {
             setIsSubmitting(false);
         }
     };
 
     useEffect(() => {
-        fetchUser();
-    }, []);
+        if (!isLogged) {
+            fetchUser();
+        }
+    }, [isLogged]);
 
-    if (isLogged) {
-        window.location.href = '/dashboard';
-    }
+    useEffect(() => {
+        if (isLogged) {
+            navigate('/dashboard');
+        }
+    }, [isLogged, navigate]);
 
     if (isLoading) {
         return (
@@ -83,7 +92,6 @@ function Login() {
                                 value={email} 
                                 onChange={(e) => setEmail(e.target.value.toLowerCase())} 
                                 required 
-                                className="form-control"
                             />
                         </Form.Group>
 
@@ -95,7 +103,6 @@ function Login() {
                                 value={password} 
                                 onChange={(e) => setPassword(e.target.value)} 
                                 required 
-                                className="form-control"
                             />
                         </Form.Group>
 
