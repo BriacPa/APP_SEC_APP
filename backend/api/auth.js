@@ -12,7 +12,7 @@ const secure = process.env.NODE_ENV === 'production'; // Ensures secure cookies 
 const transporter = nodemailer.createTransport({
     host: process.env.MAIL_HOST,
     port: process.env.MAIL_PORT,
-    secure: true, // Use true for production, false for development if using plain HTTP
+    secure: false,
     auth: {
         user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASS,
