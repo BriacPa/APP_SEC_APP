@@ -16,32 +16,33 @@ dotenv.config();
 
 const app = express();
 
-// Add cookie-parser middleware
-app.use(cookieParser());
+// Define 'secure' for cookies based on the environment
+const secure = process.env.NODE_ENV === 'production'; // Cookies should be secure in production
 
+// Use cookie-parser middleware to parse cookies (no secret)
+app.use(cookieParser()); // No need for COOKIE_SECRET if not signing cookies
 
+// CORS configuration
 const corsOptions = {
     origin: 'https://app-sec-app-client-jk1lbz71i-briacs-projects-8dadbe9b.vercel.app', // Replace with your frontend's URL
-    credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+    credentials: true, // Allow cookies and credentials to be sent with requests
+    allowedHeaders: 'Content-Type,Authorization', // Allow necessary headers like Authorization
+    methods: 'GET,POST,PUT,PATCH,DELETE,OPTIONS', // Allow specific methods
 };
 
-// Middleware
+// CORS middleware to handle requests and preflight
+app.use(cors(corsOptions));
+
+// Handle preflight (OPTIONS) requests
+app.options('*', cors(corsOptions)); // CORS preflight requests
+
+// Middleware to log incoming requests
 app.use((req, res, next) => {
     console.log(`${req.method} ${req.url}`);
     next();
 });
 
-app.use(cors(corsOptions));
-
-app.use((err, req, res, next) => {
-    if (err) {
-        console.error('CORS error:', err);
-        res.status(500).send(err);
-    } else {
-        next();
-    }
-});
-
+// Body parser setup
 app.use(bodyParser.json());
 
 // Routes
@@ -59,5 +60,15 @@ mongoose.connect(process.env.MONGO_URI)
         console.log('Connected to MongoDB Atlas');
     })
     .catch(err => console.error('MongoDB connection error:', err));
+
+// Global error handler
+app.use((err, req, res, next) => {
+    if (err) {
+        console.error('Error:', err);
+        res.status(500).send(err);
+    } else {
+        next();
+    }
+});
 
 module.exports = app;
