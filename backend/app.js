@@ -21,7 +21,8 @@ app.use(cookieParser());
 
 const corsOptions = {
     origin: 'https://app-sec-app-client.vercel.app', // Replace with your frontend's URL
-    
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type,Authorization',
     credentials: true, // Allow credentials (cookies, authorization headers, etc.)
 };
 
