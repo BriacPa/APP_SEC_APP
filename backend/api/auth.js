@@ -6,10 +6,13 @@ const router = express.Router();
 const verifyJWT = require('../middleware/verifyJWT');
 require('dotenv').config();
 
+// Define the secure flag based on environment
+const secure = true;
+
 const transporter = nodemailer.createTransport({
     host: process.env.MAIL_HOST,
     port: process.env.MAIL_PORT,
-    secure: true,
+    secure: true, // should be true for production and false for development
     auth: {
         user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASS,
@@ -94,7 +97,7 @@ const sendVerificationEmail = async (user) => {
                                 <a href="${verificationUrl}" class="btn-primary">Verify Email</a>
                             </p>
                             
-                            <p>If you were not at the orgin of this request, please ignore this email.</p>
+                            <p>If you were not at the origin of this request, please ignore this email.</p>
                         </div>
                     </div>
                     <div class="footer">
@@ -167,7 +170,7 @@ router.post('/login', async (req, res) => {
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.cookie('token', token, {
             httpOnly: true,
-            secure,
+            secure, // Use the secure flag here
             sameSite: 'none',
             maxAge: 3600000,
         });
@@ -182,7 +185,7 @@ router.post('/logout', (req, res) => {
     try {
         res.clearCookie('token', {
             httpOnly: true,
-            secure,
+            secure, // Use the secure flag here
             sameSite: 'none',
         });
         res.json({ message: 'Logged out successfully' });
