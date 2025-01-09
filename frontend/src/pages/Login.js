@@ -63,7 +63,7 @@ function Login() {
 
     useEffect(() => {
         if (isLogged) {
-            navigate('/dashboard');
+            navigate('/');
         }
     }, [isLogged, navigate]);
 
