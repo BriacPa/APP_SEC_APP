@@ -214,6 +214,7 @@ const sendDeleteAccountEmail = async (user) => {
     };
 
     try {
+        console.log('Sending deletion email to', user.email);
         await transporter.sendMail(mailOptions);
         console.log(`Deletion email sent to ${user.email}`);
     } catch (error) {
