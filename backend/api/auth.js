@@ -129,12 +129,12 @@ const sendVerificationEmail = async (user) => {
 router.post('/register', async (req, res) => {
     console.log("/register");
     try {
-        let { username, email, password, confirmPassword } = req.body;
+        let { username, email, password, confirmPassword, } = req.body;
         email = email.toLowerCase();
         const user = new User({ username, email, password });
         if (password !== confirmPassword) return res.status(400).send('Passwords do not match');
         await user.save();
-        await sendVerificationEmail(user);
+        // await sendVerificationEmail(user);
         res.status(201).send('User registered successfully!');
     } catch (error) {
         res.status(400).json({ error: error.message });

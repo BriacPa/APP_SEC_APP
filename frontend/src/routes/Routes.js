@@ -66,7 +66,7 @@ const App = () => {
                 <Route path="/reset-password-active" element={<ResetPasswordRes />} />
                 <Route path="/articles" element={<Articles />} />
                 <Route path="/articles/open" element={<Article />} />
-                <Route path="/verification/:token" element={<Verification />} />
+                {/* <Route path="/verification/:token" element={<Verification />} /> */}
                 <Route path="/verification-del/:token" element={<VerificationDel />} />
 
                 {/* Protected Routes */}
