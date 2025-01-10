@@ -140,7 +140,7 @@ const App = () => {
                 />
 
                 {/* Redirect if route doesn't exist */}
-                <Route path="*" element={<Navigate to="/login" />} />
+                <Route path="*" element={<Navigate to="/" />} />
             </Routes>
         </Router>
     );
