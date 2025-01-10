@@ -13,9 +13,4 @@ function App() {
     );
 }
 
-const link = document.createElement('link');
-link.rel = 'icon';
-link.href = './assts/images/logo.ico';
-document.head.appendChild(link);
-
 export default App;
