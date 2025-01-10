@@ -61,13 +61,13 @@ function Login() {
         }
     }, [isLogged]);
 
-    useEffect(() => {
-        if (isLogged) {
-            window.location.reload();
+    // useEffect(() => {
+    //     if (isLogged) {
+    //         window.location.reload();
 
-            navigate('/');
-        }
-    }, [isLogged, navigate]);
+    //         navigate('/');
+    //     }
+    // }, [isLogged, navigate]);
 
     if (isLoading) {
         return (
