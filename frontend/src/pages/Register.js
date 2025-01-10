@@ -61,7 +61,7 @@ function Register() {
 
         try {
             await axiosInstance.post('/auth/register', { username, email, password, confirmPassword });
-            setSuccess('Check your email to verify your account');
+            setSuccess('Registered successfully!');
         } catch (err) {
             if (err.response?.status === 409) {
                 setError('Username or email already in use');

@@ -63,6 +63,7 @@ function Login() {
 
     useEffect(() => {
         if (isLogged) {
+            window.location.reload();
             navigate('/');
         }
     }, [isLogged, navigate]);

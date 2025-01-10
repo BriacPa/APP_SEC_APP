@@ -50,10 +50,7 @@ router.post('/change-email', verifyJWT, async (req, res) => {
 
         user.email = mail;
         await user.save();
-
-        sendVerificationEmail(user);
-
-        res.json({ message: 'Email updated. Verification email sent.' });
+        res.json({ message: 'Email updated' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to change email' });
     }

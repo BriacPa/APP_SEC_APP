@@ -19,11 +19,10 @@ const UserDash = ({ user, setUser, setError }) => {
             await axiosInstance.post('/user/delete-account-req', { withCredentials: true });
             setShowAlert(true);
             console.log('Account deletion request sent.');
-
-            // await axiosInstance.post('/auth/logout', {}, {
-            //     withCredentials: true,
-            // });
-            // navigate('/login');
+            await axiosInstance.post('/auth/logout', {}, {
+                withCredentials: true,
+            });
+            navigate('/login');
         } catch (err) {
             console.error('Error during account deletion:', err);
             setError && setError('Error occurred during account deletion or logout');
