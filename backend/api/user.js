@@ -157,10 +157,27 @@ router.post('/delete-account-req', verifyJWT, async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
         if (!user) return res.status(404).json({ error: 'User not found' });
+        const userId = req.user.id;
+        await user.deleteOne();
+        if (Comment.find({ author: userId })) {
+            await Comment.updateMany({ author: userId }, { $unset: { author: "" } });
+        }
+        if (Article.find({ author: userId })) {
+            const articles = await Article.find({ author: userId });
+            for (const article of articles) {
+                await Comment.deleteMany({ article: article._id });
+            }
+            await Article.deleteMany({ author: userId });
+        }
+        if (Rates.find({ author: userId })) {
+            const ratedArticles = await Rates.distinct('article', { author: userId });
+            await Rates.deleteMany({ author: userId });
+            for (const articleId of ratedArticles) {
+                await updateArticleRate(articleId);
+            }
+        }
+        res.status(200).json({ message: 'Account successfully deleted.' });
 
-        sendDeleteAccountEmail(user);
-
-        res.json({ message: 'Delete account email sent.' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to process delete account request.' });
     }
