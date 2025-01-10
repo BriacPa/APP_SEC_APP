@@ -112,7 +112,7 @@ function Login() {
                     </Form>
                     <div className="text-center mt-3">
                         <p>Don't have an account? <a href="/register">Sign up</a></p>
-                        <p><a href="/reset-password">Forgot your password?</a></p>
+                        {/* <p><a href="/reset-password">Forgot your password?</a></p> */}
                     </div>
                 </Col>
             </Row>
