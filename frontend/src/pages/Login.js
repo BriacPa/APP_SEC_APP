@@ -47,6 +47,7 @@ function Login() {
         try {
             await axiosInstance.post('/auth/login', { email, password });
             fetchUser(); // This updates the user state after login
+            window.location.reload();
         } catch (err) {
             console.log('Login error:', err);
             setErrorMessage(err.response?.data?.message || 'Error during login');
